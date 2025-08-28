@@ -51,7 +51,7 @@ router.post("/login", async (req, res) => {
 router.post("/verify-otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
-
+console.log(email,otp)
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: "User not found" });
 
