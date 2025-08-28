@@ -41,13 +41,13 @@ const productSchema = new mongoose.Schema(
     images: [{ type: String }],
 
     // Personalized discounts (admin can assign per user)
-    userDiscounts: [
-      {
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        discountPercentage: { type: Number, default: 0 }, // e.g. 10 means 10% off
-        discountPrice: { type: Number }, // store pre-calculated price if needed
-      },
-    ],
+    // userDiscounts: [
+    //   {
+    //     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    //     discountPercentage: { type: Number, default: 0 }, // e.g. 10 means 10% off
+    //     discountPrice: { type: Number }, // store pre-calculated price if needed
+    //   },
+    // ],
   },
   { timestamps: true }
 );

@@ -1,16 +1,16 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import cors from "cors";
 
 // route imports
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/user/getuser.js";
 import doctorRoutes from "./routes/doctor/doctorRoutes.js";
-import appointmentRoutes from "./routes/doctor/appointmentRoutes.js"
-import cartRoutes from "./routes/products/cartRoutes.js"
-import orderRoutes from "./routes/products/orderRoutes.js"
-import productRoutes from "./routes/products/productRoutes.js"
-
+import appointmentRoutes from "./routes/doctor/appointmentRoutes.js";
+import cartRoutes from "./routes/products/cartRoutes.js";
+import orderRoutes from "./routes/products/orderRoutes.js";
+import productRoutes from "./routes/products/productRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +19,27 @@ const app = express();
 // connect DB
 connectDB();
 
+// ---------- CORS SETUP ----------
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://doctor.valleyhoster.com",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow mobile apps/postman
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // allow cookies / auth headers
+  })
+);
+// ---------------------------------
+
 // middleware
 app.use(express.json());
 
@@ -26,10 +47,10 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/get", userRoutes);
 app.use("/api/doctors", doctorRoutes);
-app.use("/api/appointments",appointmentRoutes)
-app.use("/api/products",productRoutes)
-app.use("/api/cart",cartRoutes)
-app.use("/api/orders",orderRoutes)
+app.use("/api/appointments", appointmentRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.get("/", (req, res) => {
   res.send("hey there");
