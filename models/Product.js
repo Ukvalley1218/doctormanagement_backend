@@ -40,14 +40,7 @@ const productSchema = new mongoose.Schema(
     // Gallery images
     images: [{ type: String }],
 
-    // Personalized discounts (admin can assign per user)
-    // userDiscounts: [
-    //   {
-    //     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    //     discountPercentage: { type: Number, default: 0 }, // e.g. 10 means 10% off
-    //     discountPrice: { type: Number }, // store pre-calculated price if needed
-    //   },
-    // ],
+    
   },
   { timestamps: true }
 );
@@ -104,3 +97,16 @@ export default mongoose.model("Product", productSchema);
 
 // export default mongoose.model("Product", productSchema);
 
+
+
+
+
+// use later
+// Personalized discounts (admin can assign per user)
+    // userDiscounts: [
+    //   {
+    //     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    //     discountPercentage: { type: Number, default: 0 }, // e.g. 10 means 10% off
+    //     discountPrice: { type: Number }, // store pre-calculated price if needed
+    //   },
+    // ],

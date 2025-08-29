@@ -6,8 +6,8 @@ import { auth } from '../../middleware/auth.js';
 
 const router=express.Router();
 
-router.get('/',auth,getCart);    //add auth when real testting 
-router.post('/',auth,addToCart);    //add auth when real testting 
-router.delete('/',auth,removeFromCart);    //add auth when real testting 
+router.get('/',getCart);    //add auth when real testting 
+router.post('/',addToCart);    //add auth when real testting 
+router.delete('/',removeFromCart);    //add auth when real testting 
 
 export default router;
