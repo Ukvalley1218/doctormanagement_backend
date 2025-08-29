@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
 
     // optional extras
     phone: { type: String },
+    address:{type:String},
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true } // adds createdAt & updatedAt automatically

@@ -96,16 +96,42 @@ import Cart from "../../models/Cart.js";
 import Product from "../../models/Product.js";
 
 // Get cart by session_id
+// export const getCart = async (req, res) => {
+//   try {
+//     const { session_id } = req.body; // or from query / headers
+//     if (!session_id) return res.status(400).json({ message: "Session ID is required" });
+
+//     const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
+//     res.json(cart || { sessionId: session_id, items: [] });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
+
 export const getCart = async (req, res) => {
+
   try {
-    const { session_id } = req.body; // or from query / headers
-    if (!session_id) return res.status(400).json({ message: "Session ID is required" });
+
+    const session_id = req.query.session_id || req.headers["session-id"];
+
+    if (!session_id) {
+
+      return res.status(400).json({ message: "Session ID is required" });
+
+    }
+
+
 
     const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
+
     res.json(cart || { sessionId: session_id, items: [] });
+
   } catch (err) {
+
     res.status(500).json({ message: "Server error", error: err.message });
+
   }
+
 };
 
 // Add item to cart
