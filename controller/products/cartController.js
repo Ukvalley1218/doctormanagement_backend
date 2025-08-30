@@ -191,16 +191,17 @@ export const updateCart = async (req, res) => {
 // Remove item from cart
 export const removeFromCart = async (req, res) => {
   try {
-    const { session_id } = req.query.session_id || req.headers["session-id"];
+    const session_id  = req.query.session_id || req.headers["session-id"];
     if (!session_id)
       return res.status(400).json({ message: "Session ID is required" });
 
-    let cart = await Cart.findOneAndDelete({ sessionId: session_id });
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
+    // delete cart  by session id
+    const cart = await Cart.findOneAndDelete({ sessionId: session_id });
+    if (!cart) {return res.status(404).json({ message: "Cart not found" })};
 
     // cart.items = cart.items.filter((i) => i.session_id.toString() !== session_id);
 
-    res.json({message:"cart deleted succesfully"})
+    return res.json({message:"cart deleted succesfully"})
     // res.json(cart);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
