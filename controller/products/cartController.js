@@ -138,10 +138,20 @@ export const addToCart = async (req, res) => {
       const existingItem = cart.items.find(
         (i) => i.productId.toString() === productId
       );
+
       if (existingItem) {
-        existingItem.quantity = quantity;
+        if (quantity <= 0) {
+          // remove if 0
+          cart.items = cart.items.filter(
+            (i) => i.productId.toString() !== productId
+          );
+        } else {
+          existingItem.quantity = quantity;
+        }
       } else {
-        cart.items.push({ productId, quantity });
+        if (quantity > 0) {
+          cart.items.push({ productId, quantity });
+        }
       }
     }
 
