@@ -191,7 +191,7 @@ export const updateCart = async (req, res) => {
 // Remove item from cart
 export const removeFromCart = async (req, res) => {
   try {
-    const session_id  = req.query.session_id || req.headers["session-id"];
+    const {session_id } = req.body;
     if (!session_id)
       return res.status(400).json({ message: "Session ID is required" });
 
