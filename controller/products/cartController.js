@@ -191,7 +191,7 @@ export const updateCart = async (req, res) => {
 // Remove item from cart
 export const removeFromCart = async (req, res) => {
   try {
-    const { session_id } = req.body;
+    const { session_id } = req.query.session_id || req.headers["session-id"];
     if (!session_id)
       return res.status(400).json({ message: "Session ID is required" });
 
@@ -201,7 +201,7 @@ export const removeFromCart = async (req, res) => {
     // cart.items = cart.items.filter((i) => i.session_id.toString() !== session_id);
 
     res.json({message:"cart deleted succesfully"})
-    res.json(cart);
+    // res.json(cart);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
