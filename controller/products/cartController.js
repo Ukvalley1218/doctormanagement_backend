@@ -200,7 +200,7 @@ export const removeFromCart = async (req, res) => {
 
     // cart.items = cart.items.filter((i) => i.session_id.toString() !== session_id);
 
-    await cart.save();
+    res.json({message:"cart deleted succesfully"})
     res.json(cart);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
