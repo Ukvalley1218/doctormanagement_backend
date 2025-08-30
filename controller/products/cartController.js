@@ -122,35 +122,35 @@ export const getCart = async (req, res) => {
 };
 
 // Add item to cart
-// export const addToCart = async (req, res) => {
-//   try {
-//     const { items, session_id } = req.body;
-//     if (!session_id)
-//       return res.status(400).json({ message: "Session ID is required" });
+export const addToCart = async (req, res) => {
+  try {
+    const { items, session_id } = req.body;
+    if (!session_id)
+      return res.status(400).json({ message: "Session ID is required" });
 
-//     let cart = await Cart.findOne({ sessionId: session_id });
-//     if (!cart) {
-//       cart = new Cart({ sessionId: session_id, items: [] });
-//     }
+    let cart = await Cart.findOne({ sessionId: session_id });
+    if (!cart) {
+      cart = new Cart({ sessionId: session_id, items: [] });
+    }
 
-//     for (const newItem of items) {
-//       const { productId, quantity } = newItem;
-//       const existingItem = cart.items.find(
-//         (i) => i.productId.toString() === productId
-//       );
-//       if (existingItem) {
-//         existingItem.quantity += quantity;
-//       } else {
-//         cart.items.push({ productId, quantity });
-//       }
-//     }
+    for (const newItem of items) {
+      const { productId, quantity } = newItem;
+      const existingItem = cart.items.find(
+        (i) => i.productId.toString() === productId
+      );
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        cart.items.push({ productId, quantity });
+      }
+    }
 
-//     await cart.save();
-//     res.json(cart);
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error", error: err.message });
-//   }
-// };
+    await cart.save();
+    res.json(cart);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
 
 // Update item quantity in cart
 export const updateCart = async (req, res) => {
@@ -202,43 +202,43 @@ export const removeFromCart = async (req, res) => {
 // this api use if user add existing item again, so it will increase existing item quantity instead of add new item 
 // Add or update items in cart
 
-export const addToCart = async (req, res) => {
-  try {
-    const { items, session_id } = req.body;
-    if (!session_id) return res.status(400).json({ message: "Session ID is required" });
+// export const addToCart = async (req, res) => {
+//   try {
+//     const { items, session_id } = req.body;
+//     if (!session_id) return res.status(400).json({ message: "Session ID is required" });
 
-    let cart = await Cart.findOne({ sessionId: session_id });
-    if (!cart) {
-      cart = new Cart({ sessionId: session_id, items: [] });
-    }
+//     let cart = await Cart.findOne({ sessionId: session_id });
+//     if (!cart) {
+//       cart = new Cart({ sessionId: session_id, items: [] });
+//     }
 
-    for (const newItem of items) {
-      const { productId, quantity } = newItem;
-      const existingItem = cart.items.find(
-        (i) => i.productId.toString() === productId
-      );
+//     for (const newItem of items) {
+//       const { productId, quantity } = newItem;
+//       const existingItem = cart.items.find(
+//         (i) => i.productId.toString() === productId
+//       );
 
-      if (existingItem) {
-        if (quantity <= 0) {
-          // Remove if quantity is 0
-          cart.items = cart.items.filter(
-            (i) => i.productId.toString() !== productId
-          );
-        } else {
-          // Replace quantity instead of adding
-          existingItem.quantity += quantity;
-        }
-      } else {
-        if (quantity > 0) {
-          cart.items.push({ productId, quantity });
-        }
-      }
-    }
+//       if (existingItem) {
+//         if (quantity <= 0) {
+//           // Remove if quantity is 0
+//           cart.items = cart.items.filter(
+//             (i) => i.productId.toString() !== productId
+//           );
+//         } else {
+//           // Replace quantity instead of adding
+//           existingItem.quantity += quantity;
+//         }
+//       } else {
+//         if (quantity > 0) {
+//           cart.items.push({ productId, quantity });
+//         }
+//       }
+//     }
 
-    await cart.save();
-    res.json(cart);
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-};
+//     await cart.save();
+//     res.json(cart);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 
