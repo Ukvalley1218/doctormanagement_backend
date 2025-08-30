@@ -195,10 +195,10 @@ export const removeFromCart = async (req, res) => {
     if (!session_id)
       return res.status(400).json({ message: "Session ID is required" });
 
-    let cart = await Cart.findOne({ sessionId: session_id });
+    let cart = await Cart.findOneAndDelete({ sessionId: session_id });
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
-    cart.items = cart.items.filter((i) => i.productId.toString() !== productId);
+    // cart.items = cart.items.filter((i) => i.session_id.toString() !== session_id);
 
     await cart.save();
     res.json(cart);
