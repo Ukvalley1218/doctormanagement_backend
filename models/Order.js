@@ -21,8 +21,11 @@ const orderSchema = new mongoose.Schema(
     ],
     shippingDetails: {
       name: String,
+      apartment:String,
+      landmark:String,
       address: String,
       city: String,
+      state:String,
       zip: String,
       phone: String,
     },
@@ -31,6 +34,7 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "successful", "failed"],
       default: "pending",
     },
+    orderStatus:{type:String,enum:["Placed","Out For Delivery","Delivered"],default:"Placed"},
   },
   { timestamps: true }
 );
