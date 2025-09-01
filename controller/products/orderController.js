@@ -11,7 +11,9 @@ export const placeOrder = async (req, res) => {
     }
 
     // Find cart by session_id
-    const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
+    const cart = await Cart.findOne({ sessionId: session_id }).populate(
+      "items.productId"
+    );
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
@@ -19,7 +21,9 @@ export const placeOrder = async (req, res) => {
     // Check stock availability
     for (let item of cart.items) {
       if (item.quantity > item.productId.stock) {
-        return res.status(400).json({ message: `${item.productId.name} is out of stock` });
+        return res
+          .status(400)
+          .json({ message: `${item.productId.name} is out of stock` });
       }
     }
 
@@ -45,10 +49,14 @@ export const placeOrder = async (req, res) => {
     }
 
     // Clear cart after placing order
-    cart.items = [];
-    await cart.save();
+    // cart.items = [];
+    // await cart.save();
 
-    res.status(201).json({ message: "Order placed successfully", order });
+    await Cart.findOneAndDelete({ sessionId: session_id });
+
+    return res
+      .status(201)
+      .json({ message: "Order placed successfully", order });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
@@ -57,29 +65,20 @@ export const placeOrder = async (req, res) => {
 // Get my orders
 export const getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.id }).populate("items.productId");
+    const orders = await Order.find({ userId: req.user.id }).populate(
+      "items.productId"
+    );
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-// old code 
+// old code
 
 // import Order from "../../models/Order.js";
 // import Product from "../../models/Product.js";
 // import Cart from "../../models/Cart.js";
-
 
 // //Place an order
 // export const placeOrder = async (req, res) => {
@@ -137,6 +136,3 @@ export const getMyOrders = async (req, res) => {
 //     res.status(500).json({ message: "Server error", error: err.message });
 //   }
 // };
-
-
-

@@ -88,8 +88,6 @@ import Product from "../../models/Product.js";
 //   }
 // };
 
-
-
 // Get cart by session_id
 // export const getCart = async (req, res) => {
 //   try {
@@ -191,26 +189,42 @@ export const updateCart = async (req, res) => {
 // Remove item from cart
 export const removeFromCart = async (req, res) => {
   try {
-    const {session_id } = req.body;
+    const { session_id } = req.body;
     if (!session_id)
       return res.status(400).json({ message: "Session ID is required" });
 
     // delete cart  by session id
     const cart = await Cart.findOneAndDelete({ sessionId: session_id });
-    if (!cart) {return res.status(404).json({ message: "Cart not found" })};
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
 
     // cart.items = cart.items.filter((i) => i.session_id.toString() !== session_id);
 
-    return res.json({message:"cart deleted succesfully"})
+    return res.json({ message: "cart deleted succesfully" });
     // res.json(cart);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
+// remove specfic product from cart
+export const removeproductFromCart = async (req, res) => {
+  try {
+    const { productId, session_id } = req.body;
+    if (!session_id)
+      return res.status(400).json({ message: "Session ID is required" });
+    let cart = await Cart.findOne({ sessionId: session_id });
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+    cart.items = cart.items.filter((i) => i.productId.toString() !== productId);
+    await cart.save();
+    res.json(cart);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
 
-
-// this api use if user add existing item again, so it will increase existing item quantity instead of add new item 
+// this api use if user add existing item again, so it will increase existing item quantity instead of add new item
 // Add or update items in cart
 
 // export const addToCart = async (req, res) => {
@@ -252,4 +266,3 @@ export const removeFromCart = async (req, res) => {
 //     res.status(500).json({ message: "Server error", error: err.message });
 //   }
 // };
-
