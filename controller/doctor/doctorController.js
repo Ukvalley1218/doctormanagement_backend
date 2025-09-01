@@ -47,3 +47,50 @@ export const addDoctor = async (req, res) => {
     res.status(400).json({ message: "Invalid data", error: err.message });
   }
 };
+
+
+
+
+export const addReviews = async (req,res)=>{
+  try {
+    const {rating,comment}=res.body;
+    const {doctorId}=req.params;
+
+    // find doctor
+    const doctor =  await Doctor.findById(doctorId);
+    if(!doctor){
+      return res.status(404).json({msg:"doctor not found"})
+    }
+
+
+    // check if already reviewd
+    const alreadyReviewed = doctor.reviews.find(
+      (r) => r.userId.toString() === req.user.id
+    );
+    if(alreadyReviewed){
+      return res.status(400).json({msg:"you already reviewd this doctor"})
+    }
+
+    // push review
+    const review = {
+      userId: req.user.id, // from auth middleware
+      rating,
+      comment,
+    };
+
+    doctor.reviews.push(review);
+
+    // update average rating
+    doctor.rating =
+      doctor.reviews.reduce((acc, item) => acc + item.rating, 0) /
+      doctor.reviews.length;
+
+    await doctor.save();
+
+    res.status(201).json({ msg: "Review added successfully", doctor });
+
+
+  } catch (error) {
+    res.status(500).json({message:"Error",error:error.message})
+  }
+}

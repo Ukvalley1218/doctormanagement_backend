@@ -74,6 +74,50 @@ export const getMyOrders = async (req, res) => {
   }
 };
 
+// Return a specific product from an order
+export const returnProduct = async (req, res) => {
+  try {
+    const { orderId, productId } = req.body;
+
+    // find order
+    const order = await Order.findOne({ _id: orderId, userId: req.user.id });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // find item in order
+    const itemIndex = order.items.findIndex(
+      (i) => i.productId.toString() === productId
+    );
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: "Product not found in order" });
+    }
+
+    // mark item as returned
+    order.items[itemIndex].status = "returned";
+
+    // restore stock
+    await Product.findByIdAndUpdate(productId, {
+      $inc: { stock: order.items[itemIndex].quantity },
+    });
+
+    // remove product from order
+    order.items.splice(itemIndex, 1);
+
+    await order.save();
+
+    res.json({ message: "Product returned successfully", order });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
+
+
+
+
+
 // old code
 
 // import Order from "../../models/Order.js";
