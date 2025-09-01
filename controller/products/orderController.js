@@ -5,7 +5,7 @@ import Cart from "../../models/Cart.js";
 // Place an order
 export const placeOrder = async (req, res) => {
   try {
-    const { session_id, shippingDetails } = req.body;
+    const { session_id, shippingDetails,totalPrice,deliverfee } = req.body;
     if (!session_id) {
       return res.status(400).json({ message: "Session ID is required" });
     }
