@@ -35,6 +35,8 @@ export const placeOrder = async (req, res) => {
         quantity: i.quantity,
         price: i.productId.price,
       })),
+      totalPrice,
+      deliverfee,
       shippingDetails,
       paymentStatus: "successful", // TODO: integrate Stripe/Razorpay
     });
@@ -48,9 +50,7 @@ export const placeOrder = async (req, res) => {
       });
     }
 
-    // Clear cart after placing order
-    // cart.items = [];
-    // await cart.save();
+   
 
     await Cart.findOneAndDelete({ sessionId: session_id });
 

@@ -12,6 +12,7 @@ const orderSchema = new mongoose.Schema(
         productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
         quantity: Number,
         price: Number,
+        deliverfee: Number,
         status: {
           type: String,
           enum: ["purchased", "returned"],
@@ -19,13 +20,15 @@ const orderSchema = new mongoose.Schema(
         },
       },
     ],
+    totalPrice: { type: Number },
+    deliverfee: { type: Number ,default:0},
     shippingDetails: {
       name: String,
-      apartment:String,
-      landmark:String,
+      apartment: String,
+      landmark: String,
       address: String,
       city: String,
-      state:String,
+      state: String,
       zip: String,
       phone: String,
     },
@@ -34,7 +37,11 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "successful", "failed"],
       default: "pending",
     },
-    orderStatus:{type:String,enum:["Placed","Out For Delivery","Delivered"],default:"Placed"},
+    orderStatus: {
+      type: String,
+      enum: ["Placed", "Out For Delivery", "Delivered"],
+      default: "Placed",
+    },
   },
   { timestamps: true }
 );
