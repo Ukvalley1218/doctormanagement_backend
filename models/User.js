@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
 
     
-
+    userDiscount:{type:Number,default: 0, min: 0, max: 100},
     role: {
       type: String,
       enum: ["user", "doctor", "admin"], // 🔑 roles for access control

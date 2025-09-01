@@ -30,6 +30,7 @@ const productSchema = new mongoose.Schema(
     // Pricing
     actualPrice: { type: Number, required: true }, // MRP
     sellingPrice: { type: Number, required: true }, // Public selling price
+    discountPrice:{type:Number,default:0,min:0,max:100},
 
     stock: { type: Number, required: true, default: 0 },
     description: { type: String, trim: true },
