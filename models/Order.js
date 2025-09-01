@@ -22,6 +22,8 @@ const orderSchema = new mongoose.Schema(
     ],
     totalPrice: { type: Number },
     deliverfee: { type: Number ,default:0},
+    productValue:{type:Number},
+    discountAmount:{type:Number},
     shippingDetails: {
       name: String,
       apartment: String,
