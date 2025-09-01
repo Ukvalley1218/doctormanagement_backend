@@ -21,7 +21,16 @@ const userSchema = new mongoose.Schema(
 
     // optional extras
     phone: { type: String },
-    address:{type:String},
+     // structured address
+    address: {
+      apartment: { type: String },
+      landmark: { type: String },
+      address: { type: String },
+      city: { type: String },
+      state: { type: String },
+      zip: { type: String },
+    },
+
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true } // adds createdAt & updatedAt automatically
