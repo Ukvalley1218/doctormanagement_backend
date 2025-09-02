@@ -92,6 +92,28 @@ export const getMyOrders = async (req, res) => {
   }
 };
 
+// get order by id
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find order by ID and ensure it belongs to the logged-in user
+    const order = await Order.findOne({ _id: id })
+      .populate({
+        path: "items.productId",
+        model: "Product", // full product details
+      });
+      
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
 // Return a specific product from an order
 export const returnProduct = async (req, res) => {
   try {
@@ -159,8 +181,7 @@ export const generateInvoice = async (req, res) => {
 
     // 🔹 Header with Logo & Shop Name
     doc.image("public/logo.png", 40, 30, { width: 60 }); // add your shop logo
-    doc.fontSize(18).text("Healcure", 110, 35);
-    doc.fontSize(10).text("www.HealCure.com", 110, 55);
+    
     doc.moveDown(2);
 
     // Line separator
