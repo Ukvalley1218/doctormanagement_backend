@@ -87,9 +87,9 @@ export const placeOrder = async (req, res) => {
 // Get my orders
 export const getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.id }).populate(
-      "items.productId"
-    );
+    const orders = await Order.find({ userId: req.user.id })
+  .populate("items.productId")
+  .sort({ createdAt: -1 }); // newest first
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
