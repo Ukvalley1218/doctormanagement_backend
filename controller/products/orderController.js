@@ -78,7 +78,7 @@ export const placeOrder = async (req, res) => {
 export const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id })
-  .populate("productId")
+  .populate("items.productId")
   .sort({ createdAt: -1 }); // newest first
     res.json(orders);
   } catch (err) {
