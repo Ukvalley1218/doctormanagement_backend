@@ -117,7 +117,7 @@ export const returnProduct = async (req, res) => {
     const { orderId, productId } = req.body;
 
     // find order
-    const order = await Order.findOne({ _id: orderId, userId: req.user.id });
+    const order = await Order.findOne({ _id: orderId});
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
