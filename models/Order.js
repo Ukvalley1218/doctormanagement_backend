@@ -59,11 +59,11 @@ const orderSchema = new mongoose.Schema(
     items: [
       {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-        // name: String,
+        name: String,
         // description: String,
         // image: String,
-        // price: Number,
-        // quantity: Number,
+        price: Number,
+        quantity: Number,
         status: {
           type: String,
           enum: ["purchased", "returned"],

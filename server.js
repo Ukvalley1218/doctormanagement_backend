@@ -11,6 +11,8 @@ import appointmentRoutes from "./routes/doctor/appointmentRoutes.js";
 import cartRoutes from "./routes/products/cartRoutes.js";
 import orderRoutes from "./routes/products/orderRoutes.js";
 import productRoutes from "./routes/products/productRoutes.js";
+import settingroutes from "./routes/setting/settingroute.js"
+import countRoute from "./routes/products/countRoute.js"
 
 dotenv.config();
 
@@ -51,6 +53,8 @@ app.use("/api/appointments", appointmentRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/setting",settingroutes)
+app.use("/api",countRoute);
 
 app.get("/", (req, res) => {
   res.send("hey there");

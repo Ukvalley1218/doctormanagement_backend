@@ -45,9 +45,9 @@ export const placeOrder = async (req, res) => {
       items: cart.items.map((i) => ({
         productId: i.productId._id,
         name: i.productId.name,
-        description: i.productId.description,
-        image: i.productId.image,
-        price: i.productId.price,
+        description: i.description,
+        image: i.image,
+        price: i.productId.sellingPrice,
         quantity: i.quantity,
       })),
       totalPrice,
@@ -180,7 +180,7 @@ export const generateInvoice = async (req, res) => {
     doc.pipe(res);
 
     // 🔹 Header with Logo & Shop Name
-    doc.image("public/logo.png", 40, 30, { width: 60 }); // add your shop logo
+    doc.image("public/logo.png", 50, 40, { width: 80 }); // add your shop logo
     
     doc.moveDown(2);
 
@@ -203,7 +203,7 @@ export const generateInvoice = async (req, res) => {
       .text(`${order.shippingDetails.address}, ${order.shippingDetails.city}`)
       .text(`${order.shippingDetails.state}, ${order.shippingDetails.zip}`)
       .text(`Phone: ${order.shippingDetails.phone}`);
-    doc.moveDown(2);
+    doc.moveDown(4);
 
     // 🔹 Order Items Table (like Amazon/Flipkart)
     const tableTop = 220;
@@ -222,7 +222,7 @@ export const generateInvoice = async (req, res) => {
     let y = tableTop + 25;
 
     order.items.forEach((item, index) => {
-      const total = item.quantity * item.price;
+      const total = item.price * item.quantity;
       doc.fontSize(10)
         .text(item.productId?.name || "Product", itemX, y)
         .text(item.quantity, qtyX, y)
@@ -231,7 +231,7 @@ export const generateInvoice = async (req, res) => {
       y += 20;
     });
 
-    doc.moveDown(2);
+    doc.moveDown(3);
 
     // 🔹 Totals Section (right-aligned like Amazon)
     const summaryTop = y + 20;
@@ -248,7 +248,7 @@ export const generateInvoice = async (req, res) => {
 
     // 🔹 Footer
     doc.moveDown(4);
-    doc.fontSize(10).text("Thank you for shopping with DryFruit Hut!", {
+    doc.fontSize(10).text("Thank you for shopping with HealCure!", {
       align: "center",
     });
     doc.fontSize(8).text("This is a system generated invoice and does not require a signature.", {
