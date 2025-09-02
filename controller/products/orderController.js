@@ -78,7 +78,7 @@ export const placeOrder = async (req, res) => {
 export const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id })
-  .populate("items.productId")
+  .populate("productId")
   .sort({ createdAt: -1 }); // newest first
     res.json(orders);
   } catch (err) {
@@ -129,62 +129,104 @@ export const generateInvoice = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    // find order by custom orderId (ORD-2025-001) instead of _id
-    const order = await Order.findOne({ orderId }).populate("items.productId userId");
+    const order = await Order.findOne({ orderId })
+      .populate("items.productId userId");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // create invoice folder if not exists
     const invoiceDir = path.join(process.cwd(), "invoices");
     if (!fs.existsSync(invoiceDir)) {
       fs.mkdirSync(invoiceDir);
     }
 
-    // PDF file path
     const invoicePath = path.join(invoiceDir, `invoice-${order.orderId}.pdf`);
 
-    // setup PDF doc
-    const doc = new PDFDocument({ margin: 50 });
+    const doc = new PDFDocument({ margin: 40, size: "A4" });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename=invoice-${order.orderId}.pdf`);
 
-    doc.pipe(fs.createWriteStream(invoicePath)); // save on server
-    doc.pipe(res); // send to client
+    doc.pipe(fs.createWriteStream(invoicePath)); 
+    doc.pipe(res);
 
-    // 🔹 Header
-    doc.fontSize(20).text("Invoice", { align: "center" });
+    // 🔹 Header with Logo & Shop Name
+    doc.image("public/logo.png", 40, 30, { width: 60 }); // add your shop logo
+    doc.fontSize(18).text("Healcure", 110, 35);
+    doc.fontSize(10).text("www.HealCure.com", 110, 55);
+    doc.moveDown(2);
+
+    // Line separator
+    doc.moveTo(40, 90).lineTo(550, 90).stroke();
+
+    // 🔹 Invoice Info
+    doc.fontSize(14).text("INVOICE", { align: "right" });
     doc.moveDown();
-    doc.fontSize(12).text(`Invoice No: ${order.orderId}`);
-    doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
-    doc.moveDown();
+    doc.fontSize(10)
+      .text(`Invoice No: ${order.orderId}`, { align: "right" })
+      .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, { align: "right" });
+
+    doc.moveDown(2);
 
     // 🔹 Shipping Details
-    doc.fontSize(14).text("Shipping Details:");
-    doc.fontSize(12).text(`${order.shippingDetails.name}`);
-    doc.text(`${order.shippingDetails.address}, ${order.shippingDetails.city}`);
-    doc.text(`${order.shippingDetails.state}, ${order.shippingDetails.zip}`);
-    doc.text(`Phone: ${order.shippingDetails.phone}`);
-    doc.moveDown();
+    doc.fontSize(12).text("Shipping Address:", 40);
+    doc.fontSize(10)
+      .text(`${order.shippingDetails.name}`)
+      .text(`${order.shippingDetails.address}, ${order.shippingDetails.city}`)
+      .text(`${order.shippingDetails.state}, ${order.shippingDetails.zip}`)
+      .text(`Phone: ${order.shippingDetails.phone}`);
+    doc.moveDown(2);
 
-    // 🔹 Items Table
-    doc.fontSize(14).text("Order Items:");
+    // 🔹 Order Items Table (like Amazon/Flipkart)
+    const tableTop = 220;
+    const itemX = 50;
+    const qtyX = 300;
+    const priceX = 360;
+    const totalX = 450;
+
+    doc.fontSize(12).text("Item", itemX, tableTop);
+    doc.text("Qty", qtyX, tableTop);
+    doc.text("Price", priceX, tableTop);
+    doc.text("Total", totalX, tableTop);
+
+    doc.moveTo(40, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+
+    let y = tableTop + 25;
+
     order.items.forEach((item, index) => {
-      const line = `${index + 1}. ${item.productId?.name || "Product"}  -  Qty: ${item.quantity}  x ₹${item.price} = ₹${item.quantity * item.price}`;
-      doc.fontSize(12).text(line);
+      const total = item.quantity * item.price;
+      doc.fontSize(10)
+        .text(item.productId?.name || "Product", itemX, y)
+        .text(item.quantity, qtyX, y)
+        .text(`₹${item.price}`, priceX, y)
+        .text(`₹${total}`, totalX, y);
+      y += 20;
     });
 
-    doc.moveDown();
+    doc.moveDown(2);
 
-    // 🔹 Summary
-    doc.fontSize(14).text("Summary:");
-    doc.fontSize(12).text(`Product Value: ₹${order.productValue}`);
-    doc.text(`Delivery Fee: ₹${order.deliverfee}`);
-    doc.text(`Discount: ₹${order.discountAmount || 0}`);
-    doc.moveDown();
-    doc.fontSize(14).text(`Total: ₹${order.totalPrice}`, { align: "right" });
+    // 🔹 Totals Section (right-aligned like Amazon)
+    const summaryTop = y + 20;
+    doc.fontSize(12).text("Summary", 400, summaryTop);
+
+    doc.fontSize(10)
+      .text(`Product Value: ₹${order.productValue}`, 400, summaryTop + 20)
+      .text(`Delivery Fee: ₹${order.deliverfee}`, 400, summaryTop + 35)
+      .text(`Discount: -₹${order.discountAmount || 0}`, 400, summaryTop + 50);
+
+    doc.fontSize(12).text(`Grand Total: ₹${order.totalPrice}`, 400, summaryTop + 70, {
+      bold: true,
+    });
+
+    // 🔹 Footer
+    doc.moveDown(4);
+    doc.fontSize(10).text("Thank you for shopping with DryFruit Hut!", {
+      align: "center",
+    });
+    doc.fontSize(8).text("This is a system generated invoice and does not require a signature.", {
+      align: "center",
+    });
 
     doc.end();
   } catch (err) {
