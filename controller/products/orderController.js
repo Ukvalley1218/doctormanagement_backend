@@ -44,8 +44,11 @@ export const placeOrder = async (req, res) => {
       userId: req.user.id,
       items: cart.items.map((i) => ({
         productId: i.productId._id,
-        quantity: i.quantity,
+        name: i.productId.name,
+        description: i.productId.description,
+        image: i.productId.image,
         price: i.productId.price,
+        quantity: i.quantity,
       })),
       totalPrice,
       deliverfee,
