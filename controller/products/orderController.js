@@ -114,36 +114,52 @@ export const getOrderById = async (req, res) => {
 // Return a specific product from an order
 export const returnProduct = async (req, res) => {
   try {
-    const { orderId, productId } = req.body;
+    const { orderId, productId } = req.body; // productIds = [id1, id2, ...]
 
-    // find order
-    const order = await Order.findOne({ _id: orderId});
+    if (!Array.isArray(productId) || productId.length === 0) {
+      return res.status(400).json({ message: "Product IDs are required in array" });
+    }
+
+    // find order that belongs to this user
+    const order = await Order.findOne({ _id: orderId, userId: req.user.id });
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // find item in order
-    const itemIndex = order.items.findIndex(
-      (i) => i.productId.toString() === productId
-    );
-    if (itemIndex === -1) {
-      return res.status(404).json({ message: "Product not found in order" });
+    let updated = false;
+
+    for (let pid of productId) {
+      const itemIndex = order.items.findIndex(
+        (i) => i.productId.toString() === pid
+      );
+
+      if (itemIndex === -1) {
+        continue; // skip if product not found in order
+      }
+
+      if (order.items[itemIndex].status === "returned") {
+        continue; // skip already returned
+      }
+
+      // mark item as returned
+      order.items[itemIndex].status = "returned";
+
+      // restore stock
+      await Product.findByIdAndUpdate(pid, {
+        $inc: { stock: order.items[itemIndex].quantity },
+      });
+
+      updated = true;
     }
 
-    // mark item as returned
-    order.items[itemIndex].status = "returned";
+    if (!updated) {
+      return res.status(400).json({ message: "No valid products found to return" });
+    }
 
-    // restore stock
-    await Product.findByIdAndUpdate(productId, {
-      $inc: { stock: order.items[itemIndex].quantity },
-    });
-
-    // remove product from order
-    order.items.splice(itemIndex, 1);
-
+    // save order (with updated statuses)
     await order.save();
 
-    res.json({ message: "Product returned successfully", order });
+    res.json({ message: "Products returned successfully", order });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
