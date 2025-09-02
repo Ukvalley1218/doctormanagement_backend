@@ -6,7 +6,7 @@ export const set = async (req,res)=>{
 
         const set = new Setting(res.body);
         await set.save(); 
-        res.status(201).json({ msg: "setting Successfully", product });
+        res.status(201).json({ msg: "setting Successfully", set });
     }
     catch(error){
         res.status(500).json({message:error.message});
