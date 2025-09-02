@@ -3,16 +3,14 @@ import Setting from "../../models/Setting.js";
 
 export const setSetting = async (req,res)=>{
     try{
-
-        const set = new Setting(res.body);
+        
+        const set = new Setting(req.body);
         await set.save(); 
         res.status(201).json({ msg: "setting Successfully", set });
     }
     catch(error){
         res.status(500).json({message:error.message});
     }
-        
-    
 }
 
 export const getSetting = async (req,res)=>{
