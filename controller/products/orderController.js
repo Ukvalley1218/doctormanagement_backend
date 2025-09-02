@@ -37,8 +37,6 @@ export const placeOrder = async (req, res) => {
       }
     }
 
-    
-    
     // Create order linked to logged-in user
     const order = new Order({
       userId: req.user.id,
@@ -81,11 +79,11 @@ export const placeOrder = async (req, res) => {
 export const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id })
-  .populate({
-    path: "items.productId",
-    model: "Product",
-  })
-  .sort({ createdAt: -1 });
+      .populate({
+        path: "items.productId",
+        model: "Product",
+      })
+      .sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -98,12 +96,11 @@ export const getOrderById = async (req, res) => {
     const { id } = req.params;
 
     // Find order by ID and ensure it belongs to the logged-in user
-    const order = await Order.findOne({ _id: id })
-      .populate({
-        path: "items.productId",
-        model: "Product", // full product details
-      });
-      
+    const order = await Order.findOne({ _id: id }).populate({
+      path: "items.productId",
+      model: "Product", // full product details
+    });
+
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -152,36 +149,40 @@ export const returnProduct = async (req, res) => {
   }
 };
 
-
 export const generateInvoice = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    const order = await Order.findOne({ orderId })
-      .populate("items.productId userId");
+    const order = await Order.findOne({ orderId }).populate(
+      "items.productId userId"
+    );
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    const invoiceDir = path.join(process.cwd(), "invoices");
-    if (!fs.existsSync(invoiceDir)) {
-      fs.mkdirSync(invoiceDir);
-    }
+    // use this if you want to  store invoices in your folder
+    // const invoiceDir = path.join(process.cwd(), "invoices");
+    // if (!fs.existsSync(invoiceDir)) {
+    //   fs.mkdirSync(invoiceDir);
+    // }
 
-    const invoicePath = path.join(invoiceDir, `invoice-${order.orderId}.pdf`);
+    // const invoicePath = path.join(invoiceDir, `invoice-${order.orderId}.pdf`);
 
     const doc = new PDFDocument({ margin: 40, size: "A4" });
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=invoice-${order.orderId}.pdf`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=invoice-${order.orderId}.pdf`
+    );
 
-    doc.pipe(fs.createWriteStream(invoicePath)); 
+    // doc.pipe(fs.createWriteStream(invoicePath));
     doc.pipe(res);
 
     // 🔹 Header with Logo & Shop Name
     doc.image("public/logo.png", 50, 40, { width: 80 }); // add your shop logo
-    
+
     doc.moveDown(2);
 
     // Line separator
@@ -190,15 +191,19 @@ export const generateInvoice = async (req, res) => {
     // 🔹 Invoice Info
     doc.fontSize(14).text("INVOICE", { align: "right" });
     doc.moveDown();
-    doc.fontSize(10)
+    doc
+      .fontSize(10)
       .text(`Invoice No: ${order.orderId}`, { align: "right" })
-      .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, { align: "right" });
+      .text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, {
+        align: "right",
+      });
 
     doc.moveDown(2);
 
     // 🔹 Shipping Details
     doc.fontSize(12).text("Shipping Address:", 40);
-    doc.fontSize(10)
+    doc
+      .fontSize(10)
       .text(`${order.shippingDetails.name}`)
       .text(`${order.shippingDetails.address}, ${order.shippingDetails.city}`)
       .text(`${order.shippingDetails.state}, ${order.shippingDetails.zip}`)
@@ -217,13 +222,17 @@ export const generateInvoice = async (req, res) => {
     doc.text("Price", priceX, tableTop);
     doc.text("Total", totalX, tableTop);
 
-    doc.moveTo(40, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+    doc
+      .moveTo(40, tableTop + 15)
+      .lineTo(550, tableTop + 15)
+      .stroke();
 
     let y = tableTop + 25;
 
     order.items.forEach((item, index) => {
       const total = item.price * item.quantity;
-      doc.fontSize(10)
+      doc
+        .fontSize(10)
         .text(item.productId?.name || "Product", itemX, y)
         .text(item.quantity, qtyX, y)
         .text(`₹${item.price}`, priceX, y)
@@ -237,90 +246,38 @@ export const generateInvoice = async (req, res) => {
     const summaryTop = y + 20;
     doc.fontSize(12).text("Summary", 400, summaryTop);
 
-    doc.fontSize(10)
+    doc
+      .fontSize(10)
       .text(`Product Value: ₹${order.productValue}`, 400, summaryTop + 20)
       .text(`Delivery Fee: ₹${order.deliverfee}`, 400, summaryTop + 35)
       .text(`Discount: -₹${order.discountAmount || 0}`, 400, summaryTop + 50);
 
-    doc.fontSize(12).text(`Grand Total: ₹${order.totalPrice}`, 400, summaryTop + 70, {
-      bold: true,
-    });
+    doc
+      .fontSize(12)
+      .text(`Grand Total: ₹${order.totalPrice}`, 400, summaryTop + 70, {
+        bold: true,
+      });
 
     // 🔹 Footer
     doc.moveDown(4);
     doc.fontSize(10).text("Thank you for shopping with HealCure!", {
       align: "center",
     });
-    doc.fontSize(8).text("This is a system generated invoice and does not require a signature.", {
-      align: "center",
-    });
+    doc
+      .fontSize(8)
+      .text(
+        "This is a system generated invoice and does not require a signature.",
+        {
+          align: "center",
+        }
+      );
 
     doc.end();
   } catch (err) {
     console.error("Invoice Error:", err);
-    res.status(500).json({ message: "Error generating invoice", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error generating invoice", error: err.message });
   }
 };
 
-// old code
-
-// import Order from "../../models/Order.js";
-// import Product from "../../models/Product.js";
-// import Cart from "../../models/Cart.js";
-
-// //Place an order
-// export const placeOrder = async (req, res) => {
-//   try {
-//     const cart = await Cart.findOne({ userId: req.user.id }).populate("items.productId");
-
-//     if (!cart || cart.items.length === 0) {
-//       return res.status(400).json({ message: "Cart is empty" });
-//     }
-
-//     // Check stock
-//     for (let item of cart.items) {
-//       if (item.quantity > item.productId.stock) {
-//         return res.status(400).json({ message: `${item.productId.name} is out of stock` });
-//       }
-//     }
-
-//     // Create order
-//     const order = new Order({
-//       userId: req.user.id,
-//       items: cart.items.map(i => ({
-//         productId: i.productId._id,
-//         quantity: i.quantity,
-//         price: i.productId.price
-//       })),
-//       shippingDetails: req.body.shippingDetails,
-//       paymentStatus: "successful"  // can integrate Stripe/Razorpay later
-//     });
-
-//     await order.save();
-
-//     // Update stock
-//     for (let item of cart.items) {
-//       await Product.findByIdAndUpdate(item.productId._id, {
-//         $inc: { stock: -item.quantity }
-//       });
-//     }
-
-//     // Clear cart
-//     cart.items = [];
-//     await cart.save();
-
-//     res.status(201).json({ message: "Order placed successfully", order });
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error", error: err.message });
-//   }
-// };
-
-// //Get my orders
-// export const getMyOrders = async (req, res) => {
-//   try {
-//     const orders = await Order.find({ userId: req.user.id }).populate("items.productId");
-//     res.json(orders);
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error", error: err.message });
-//   }
-// };
