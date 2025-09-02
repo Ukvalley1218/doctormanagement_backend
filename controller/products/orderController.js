@@ -5,7 +5,14 @@ import Cart from "../../models/Cart.js";
 // Place an order
 export const placeOrder = async (req, res) => {
   try {
-    const { session_id, shippingDetails,totalPrice,deliverfee,productValue,discountAmount } = req.body;
+    const {
+      session_id,
+      shippingDetails,
+      totalPrice,
+      deliverfee,
+      productValue,
+      discountAmount,
+    } = req.body;
     if (!session_id) {
       return res.status(400).json({ message: "Session ID is required" });
     }
@@ -28,8 +35,23 @@ export const placeOrder = async (req, res) => {
     }
 
     // Create order linked to logged-in user
+    // const order = new Order({
+    //   userId: req.user.id, // JWT ensures user is logged in
+    //   items: cart.items.map((i) => ({
+    //     productId: i.productId._id,
+    //     quantity: i.quantity,
+    //     price: i.productId.price,
+    //   })),
+    //   totalPrice,
+    //   deliverfee,
+    //   productValue,
+    //   discountAmount,
+    //   shippingDetails,
+    //   paymentStatus: "successful", // TODO: integrate Stripe/Razorpay
+    // });
+    // Create order linked to logged-in user
     const order = new Order({
-      userId: req.user.id, // JWT ensures user is logged in
+      userId: req.user.id,
       items: cart.items.map((i) => ({
         productId: i.productId._id,
         quantity: i.quantity,
@@ -40,10 +62,10 @@ export const placeOrder = async (req, res) => {
       productValue,
       discountAmount,
       shippingDetails,
-      paymentStatus: "successful", // TODO: integrate Stripe/Razorpay
+      paymentStatus: "successful",
     });
 
-    await order.save();
+    await order.save(); // ✅ will auto-generate orderId here
 
     // Deduct stock
     for (let item of cart.items) {
@@ -51,8 +73,6 @@ export const placeOrder = async (req, res) => {
         $inc: { stock: -item.quantity },
       });
     }
-
-   
 
     await Cart.findOneAndDelete({ sessionId: session_id });
 
@@ -113,12 +133,6 @@ export const returnProduct = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
-
-
-
-
-
 
 // old code
 

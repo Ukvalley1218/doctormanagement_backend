@@ -3,16 +3,26 @@ import Product from "../../models/Product.js";
 // Get all produuucts with filters
 export const getProducts = async (req, res) => {
   try {
-    const { category, brand, minPrice, maxPrice } = req.query;
+    const { category, brand, minPrice, maxPrice, search } = req.query;
     let query = {};
 
     if (category) query.category = category;
     if (brand) query.brand = brand;
+    // price filter
     if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
+      query.sellingPrice = {};
+      if (minPrice) query.sellingPrice.$gte = Number(minPrice);
+      if (maxPrice) query.sellingPrice.$lte = Number(maxPrice);
     }
+    // search filter (name, description, brand)
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } }, // case-insensitive
+        { description: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
+      ];
+    }
+
 
     const products = await Product.find(query);
     res.json(products);
@@ -37,7 +47,7 @@ export const addProduct = async (req, res) => {
   try {
     const product = new Product(req.body);
     await product.save();
-    res.status(201).json({msg:"products added Successfully",product});
+    res.status(201).json({ msg: "products added Successfully", product });
   } catch (err) {
     res.status(400).json({ message: "Invalid data", error: err.message });
   }
@@ -46,7 +56,9 @@ export const addProduct = async (req, res) => {
 // Update product (Admin only)
 export const updateProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);
   } catch (err) {
