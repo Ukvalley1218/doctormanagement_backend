@@ -1,8 +1,10 @@
 import express from 'express';
-import { set } from "../../controller/setting/setcontroller.js";
+import { setSetting ,getSetting} from "../../controller/setting/setcontroller.js";
 
 const router = express.Router();
 
-router.post('/',set);
+router.post('/',setSetting);
+router.get('/',getSetting);
+
 
 export default router;
