@@ -13,6 +13,7 @@ import orderRoutes from "./routes/products/orderRoutes.js";
 import productRoutes from "./routes/products/productRoutes.js";
 import settingroutes from "./routes/setting/settingroute.js"
 import countRoute from "./routes/products/countRoute.js"
+import orderTrackingRoute from "./routes/products/orderTrackingRoutes.js"
 
 // admin routes imports
 import orderTrackingRoutes from "./routes/admin/orderTrackingRoutes.js"
@@ -58,6 +59,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/setting",settingroutes)
 app.use("/api",countRoute);
+app.use("/api/orders",orderTrackingRoute);
 
 
 
