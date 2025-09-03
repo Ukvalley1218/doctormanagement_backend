@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/',auth,placeOrder);
 router.get('/me',auth,getMyOrders); 
 router.get('/:id',auth,getOrderById);
-router.post('/return',auth,returnProduct)
+router.post('/productreturn',auth,returnProduct)
 
 // router for invoice generation
 router.get('/invoice/:orderId',generateInvoice);

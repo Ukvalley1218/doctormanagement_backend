@@ -125,6 +125,18 @@ const orderSchema = new mongoose.Schema(
       },
       { _id: false },
     ],
+    returnHistory: [
+  {
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+    status: {
+      type: String,
+      enum: ["Requested", "Approved", "Rejected", "Refunded"],
+      default: "Requested",
+    },
+    reason: String,
+    createdAt: { type: Date, default: Date.now }
+  }
+]
   },
   { timestamps: true }
 );

@@ -121,14 +121,16 @@ export const getOrderById = async (req, res) => {
 // Return a specific product from an order
 export const returnProduct = async (req, res) => {
   try {
-    const { orderId, productId } = req.body; // productIds = [id1, id2, ...]
+    const { orderId, productId,reason } = req.body; // productIds = [id1, id2, ...]
 
     if (!Array.isArray(productId) || productId.length === 0) {
-      return res.status(400).json({ message: "Product IDs are required in array" });
+      return res
+        .status(400)
+        .json({ message: "Product IDs are required in array" });
     }
 
     // find order that belongs to this user
-    const order = await Order.findOne({ _id: orderId, userId: req.user.id });
+    const order = await Order.findOne({ _id: orderId });
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -151,6 +153,13 @@ export const returnProduct = async (req, res) => {
       // mark item as returned
       order.items[itemIndex].status = "returned";
 
+      // add entry to returnHistory
+      order.returnHistory.push({
+        productId:pid,
+        reason:reason || "Not specified",
+        status: "Requested",
+      });
+
       // restore stock
       await Product.findByIdAndUpdate(pid, {
         $inc: { stock: order.items[itemIndex].quantity },
@@ -160,13 +169,15 @@ export const returnProduct = async (req, res) => {
     }
 
     if (!updated) {
-      return res.status(400).json({ message: "No valid products found to return" });
+      return res
+        .status(400)
+        .json({ message: "No valid products found to return" });
     }
 
     // save order (with updated statuses)
     await order.save();
 
-    res.json({ message: "Products returned successfully", order });
+    res.json({ message: "return request submitted successfully", order });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
@@ -258,8 +269,8 @@ export const generateInvoice = async (req, res) => {
         .fontSize(10)
         .text(item.productId?.name || "Product", itemX, y)
         .text(item.quantity, qtyX, y)
-        .text(`₹${item.price}`, priceX, y)
-        .text(`₹${total}`, totalX, y);
+        .text(`$${item.price}`, priceX, y)
+        .text(`$${total}`, totalX, y);
       y += 20;
     });
 
@@ -271,13 +282,13 @@ export const generateInvoice = async (req, res) => {
 
     doc
       .fontSize(10)
-      .text(`Product Value: ₹${order.productValue}`, 400, summaryTop + 20)
-      .text(`Delivery Fee: ₹${order.deliverfee}`, 400, summaryTop + 35)
-      .text(`Discount: -₹${order.discountAmount || 0}`, 400, summaryTop + 50);
+      .text(`Product Value: $${order.productValue}`, 380, summaryTop + 20)
+      .text(`Delivery Fee: $${order.deliverfee}`, 380, summaryTop + 40)
+      .text(`Discount: $${order.discountAmount || 0}`, 380, summaryTop + 60);
 
     doc
       .fontSize(12)
-      .text(`Grand Total: ₹${order.totalPrice}`, 400, summaryTop + 70, {
+      .text(`Grand Total: $${order.totalPrice.toFixed(2)}`, 400, summaryTop + 80, {
         bold: true,
       });
 
@@ -303,4 +314,3 @@ export const generateInvoice = async (req, res) => {
       .json({ message: "Error generating invoice", error: err.message });
   }
 };
-

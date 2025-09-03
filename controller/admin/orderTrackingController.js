@@ -56,11 +56,46 @@ export const getOrderTracking = async (req, res) => {
   }
 };
 
+
+
+
+
+// update return order status
+// Admin updates return status
+export const updateReturnStatus = async (req, res) => {
+  try {
+    const { orderId, productId, status } = req.body;
+
+    if (!["Approved", "Rejected", "Picked Up", "Refunded"].includes(status)) {
+      return res.status(400).json({ message: "Invalid return status" });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    const returnItem = order.returnHistory.find(
+      (r) => r.productId.toString() === productId
+    );
+    if (!returnItem) return res.status(404).json({ message: "Return request not found" });
+
+    returnItem.status = status;
+    returnItem.createdAt = new Date();
+
+    await order.save();
+
+    res.json({ message: "Return status updated", order });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
+
 /**
  * ✅ Mark returned product tracking (Admin)
  * If customer returned item → Admin approves → add timeline entry
  */
-export const updateReturnTracking = async (req, res) => {
+export const getReturnTracking = async (req, res) => {
   try {
     const { orderId, productId } = req.body;
 
