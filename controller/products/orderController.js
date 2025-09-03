@@ -54,6 +54,13 @@ export const placeOrder = async (req, res) => {
       discountAmount,
       shippingDetails,
       paymentStatus: "successful",
+      orderStatus: "Placed",
+      trackingHistory: [
+        {
+          status: "Placed",
+          note: "Order created successfully",
+        },
+      ],
     });
 
     await order.save(); // ✅ will auto-generate orderId here

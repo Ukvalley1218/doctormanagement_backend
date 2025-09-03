@@ -92,9 +92,39 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ["Placed", "Out For Delivery", "Delivered"],
+      enum: [
+        "Placed",
+        "Confirmed",
+        "Shipped",
+        "Out For Delivery",
+        "Delivered",
+        "Returned",
+        "Cancelled",
+      ],
       default: "Placed",
     },
+    trackingHistory: [
+      {
+        status: {
+          type: String,
+          enum: [
+            "Placed",
+            "Confirmed",
+
+            "Shipped",
+            "Out For Delivery",
+            "Delivered",
+            "Returned",
+            "Cancelled",
+          ],
+          required: true,
+        },
+        note: { type: String }, // optional message for admin
+        location: { type: String }, // optional (if courier updates location)
+        timestamp: { type: Date, default: Date.now },
+      },
+      { _id: false },
+    ],
   },
   { timestamps: true }
 );

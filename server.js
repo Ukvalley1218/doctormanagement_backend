@@ -14,6 +14,9 @@ import productRoutes from "./routes/products/productRoutes.js";
 import settingroutes from "./routes/setting/settingroute.js"
 import countRoute from "./routes/products/countRoute.js"
 
+// admin routes imports
+import orderTrackingRoutes from "./routes/admin/orderTrackingRoutes.js"
+
 dotenv.config();
 
 const app = express();
@@ -55,6 +58,16 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/setting",settingroutes)
 app.use("/api",countRoute);
+
+
+
+
+
+
+// admin routes
+app.use("/api/admin/orders",orderTrackingRoutes); 
+
+
 
 app.get("/", (req, res) => {
   res.send("hey there");

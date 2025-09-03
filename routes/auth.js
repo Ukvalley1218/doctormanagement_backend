@@ -66,9 +66,7 @@ router.post("/verify-otp", async (req, res) => {
     await user.save();
 
     // Create JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     res.json({
       msg: "Login successful",
