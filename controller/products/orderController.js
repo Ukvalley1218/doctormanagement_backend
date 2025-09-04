@@ -186,7 +186,6 @@ export const returnProduct = async (req, res) => {
 export const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { reason } = req.body;
 
     // find order
     const order = await Order.findOne({ _id: orderId });
@@ -195,19 +194,18 @@ export const cancelOrder = async (req, res) => {
     }
 
     // if already cancelled
-    if (order.status === "cancelled") {
+    if (order.status === "Cancelled") {
       return res.status(400).json({ message: "Order already cancelled" });
     }
 
     let updated = false;
 
     for (let item of order.items) {
-      if (item.status !== "cancelled" && item.status !== "returned") {
-        item.status = "cancelled";
+      if (item.status !== "Cancelled" && item.status !== "Returned") {
+        item.status = "Cancelled";
 
         order.returnHistory.push({
           productId: item.productId,
-          reason: reason || "Not specified",
           status: "Cancelled",
         });
 
@@ -221,9 +219,7 @@ export const cancelOrder = async (req, res) => {
     }
 
     if (!updated) {
-      return res
-        .status(400)
-        .json({ message: "No items available to cancel" });
+      return res.status(400).json({ message: "No items available to cancel" });
     }
 
     order.status = "Cancelled"; // global status
@@ -234,6 +230,7 @@ export const cancelOrder = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 
 
