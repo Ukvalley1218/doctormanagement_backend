@@ -194,15 +194,15 @@ export const cancelOrder = async (req, res) => {
     }
 
     // if already cancelled
-    if (order.status === "Cancelled") {
+    if (order.orderStatus === "Cancelled") {
       return res.status(400).json({ message: "Order already cancelled" });
     }
 
     let updated = false;
 
     for (let item of order.items) {
-      if (item.status !== "Cancelled" && item.status !== "Returned") {
-        item.status = "Cancelled";
+      if (item.orderStatus !== "Cancelled" && item.orderStatus !== "Returned") {
+        item.orderStatus = "Cancelled";
 
         order.returnHistory.push({
           productId: item.productId,
@@ -222,7 +222,7 @@ export const cancelOrder = async (req, res) => {
       return res.status(400).json({ message: "No items available to cancel" });
     }
 
-    order.status = "Cancelled"; // global status
+    order.orderStatus = "Cancelled"; // global status
     await order.save();
 
     res.json({ message: "Order cancelled successfully", order });
