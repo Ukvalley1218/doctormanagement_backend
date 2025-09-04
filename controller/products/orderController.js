@@ -183,6 +183,84 @@ export const returnProduct = async (req, res) => {
   }
 };
 
+export const cancelOrder = async (req, res) => {
+  try {
+    const { orderId, productId, reason } = req.body; // productId can be array or null
+
+    // find order
+    const order = await Order.findOne({ _id: orderId });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    let updated = false;
+
+    // If productId array is provided → cancel specific products
+    if (Array.isArray(productId) && productId.length > 0) {
+      for (let pid of productId) {
+        const itemIndex = order.items.findIndex(
+          (i) => i.productId.toString() === pid
+        );
+
+        if (itemIndex === -1) continue; // not in order
+        if (order.items[itemIndex].status === "cancelled") continue; // already cancelled
+
+        // mark item as cancelled
+        order.items[itemIndex].status = "cancelled";
+
+        // add entry to returnHistory (or cancelHistory)
+        order.returnHistory.push({
+          productId: pid,
+          reason: reason || "Not specified",
+          status: "Cancelled",
+        });
+
+        // restore stock
+        await Product.findByIdAndUpdate(pid, {
+          $inc: { stock: order.items[itemIndex].quantity },
+        });
+
+        updated = true;
+      }
+    } else {
+      // Cancel entire order
+      for (let item of order.items) {
+        if (item.status !== "cancelled" && item.status !== "returned") {
+          item.status = "cancelled";
+
+          order.returnHistory.push({
+            productId: item.productId,
+            reason: reason || "Not specified",
+            status: "Cancelled",
+          });
+
+          // restore stock
+          await Product.findByIdAndUpdate(item.productId, {
+            $inc: { stock: item.quantity },
+          });
+
+          updated = true;
+        }
+      }
+
+      order.status = "cancelled"; // optional: global status
+    }
+
+    if (!updated) {
+      return res
+        .status(400)
+        .json({ message: "No valid products found to cancel" });
+    }
+
+    await order.save();
+
+    res.json({ message: "Order cancelled successfully", order });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
 export const generateInvoice = async (req, res) => {
   try {
     const { orderId } = req.params;
