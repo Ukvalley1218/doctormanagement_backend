@@ -185,8 +185,7 @@ export const returnProduct = async (req, res) => {
 
 export const cancelOrder = async (req, res) => {
   try {
-    const { orderId } = req.params;
-
+    const { orderId } = req.body;
     // find order
     const order = await Order.findOne({ _id: orderId });
     if (!order) {
@@ -198,29 +197,29 @@ export const cancelOrder = async (req, res) => {
       return res.status(400).json({ message: "Order already cancelled" });
     }
 
-    let updated = false;
+    // let updated = false;
 
-    for (let item of order.items) {
-      if (item.orderStatus !== "Cancelled" && item.orderStatus !== "Returned") {
-        item.orderStatus = "Cancelled";
+    // for (let item of order.items) {
+    //   if (item.orderStatus !== "Cancelled" && item.orderStatus !== "Returned") {
+    //     item.orderStatus = "Cancelled";
 
-        order.returnHistory.push({
-          productId: item.productId,
-          status: "Cancelled",
-        });
+    //     order.returnHistory.push({
+    //       productId: item.productId,
+    //       status: "Cancelled",
+    //     });
 
-        // restore stock
-        await Product.findByIdAndUpdate(item.productId, {
-          $inc: { stock: item.quantity },
-        });
+    //     // restore stock
+    //     await Product.findByIdAndUpdate(item.productId, {
+    //       $inc: { stock: item.quantity },
+    //     });
 
-        updated = true;
-      }
-    }
+    //     updated = true;
+    //   }
+    // }
 
-    if (!updated) {
-      return res.status(400).json({ message: "No items available to cancel" });
-    }
+    // if (!updated) {
+    //   return res.status(400).json({ message: "No items available to cancel" });
+    // }
 
     order.orderStatus = "Cancelled"; // global status
     await order.save();

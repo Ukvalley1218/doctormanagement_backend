@@ -8,7 +8,7 @@ router.post('/',auth,placeOrder);
 router.get('/me',auth,getMyOrders); 
 router.get('/:id',auth,getOrderById);
 router.post('/productreturn',auth,returnProduct)
-router.put('/cancel/:id',auth,cancelOrder)
+router.put('/cancel',auth,cancelOrder)
 // router for invoice generation
 router.get('/invoice/:orderId',generateInvoice);
 
