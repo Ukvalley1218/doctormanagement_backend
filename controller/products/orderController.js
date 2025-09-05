@@ -183,6 +183,56 @@ export const returnProduct = async (req, res) => {
   }
 };
 
+export const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    // find order
+    const order = await Order.findOne({ _id: orderId });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // if already cancelled
+    if (order.orderStatus === "Cancelled") {
+      return res.status(400).json({ message: "Order already cancelled" });
+    }
+
+    // let updated = false;
+
+    // for (let item of order.items) {
+    //   if (item.orderStatus !== "Cancelled" && item.orderStatus !== "Returned") {
+    //     item.orderStatus = "Cancelled";
+
+    //     order.returnHistory.push({
+    //       productId: item.productId,
+    //       status: "Cancelled",
+    //     });
+
+    //     // restore stock
+    //     await Product.findByIdAndUpdate(item.productId, {
+    //       $inc: { stock: item.quantity },
+    //     });
+
+    //     updated = true;
+    //   }
+    // }
+
+    // if (!updated) {
+    //   return res.status(400).json({ message: "No items available to cancel" });
+    // }
+
+    order.orderStatus = "Cancelled"; // global status
+    await order.save();
+
+    res.json({ message: "Order cancelled successfully", order });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
+
+
 export const generateInvoice = async (req, res) => {
   try {
     const { orderId } = req.params;
