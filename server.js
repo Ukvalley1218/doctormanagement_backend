@@ -17,6 +17,12 @@ import orderTrackingRoute from "./routes/products/orderTrackingRoutes.js"
 
 // admin routes imports
 import orderTrackingRoutes from "./routes/admin/orderTrackingRoutes.js"
+import adminAuthRoutes from "./routes/admin/adminAuthRoutes.js"
+import adminOtpRoutes from "./routes/admin/adminOtpRoutes.js";
+import adminUserRoutes from "./routes/admin/adminUserRoutes.js"
+import adminProductRoutes from "./routes/admin/adminProductRoutes.js"
+import adminDoctorRoutes from "./routes/admin/adminDoctorRoutes.js"
+import adminOrderRoutes  from "./routes/admin/adminOrderRoutes.js"
 
 dotenv.config();
 
@@ -68,7 +74,12 @@ app.use("/api/orders",orderTrackingRoute);
 
 // admin routes
 app.use("/api/admin/orders",orderTrackingRoutes); 
-
+app.use("/api/admin/auth",adminAuthRoutes);
+app.use("/api/admin/otp",adminOtpRoutes);
+app.use("/api/admin/users",adminUserRoutes);
+app.use("/api/admin/products",adminProductRoutes);
+app.use("/api/admin/doctors",adminDoctorRoutes);
+app.use("/api/admin/orders",adminOrderRoutes);
 
 
 app.get("/", (req, res) => {
