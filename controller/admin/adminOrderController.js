@@ -61,7 +61,7 @@ export const updateReturnStatus = async (req, res) => {
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     const returnItem = order.returnHistory.find(r => r.productId.toString() === productId);
-
+console.log(returnItem)
     if (!returnItem) {
       return res.status(404).json({ message: "Return request not found" });
     }
