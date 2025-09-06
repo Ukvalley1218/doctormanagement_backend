@@ -12,14 +12,41 @@ export const createDoctor = async (req, res) => {
 };
 
 // @desc Get all doctors
+// export const getDoctors = async (req, res) => {
+//   try {
+//     const doctors = await Doctor.find().populate("userId", "name email role");
+//     res.json(doctors);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
+
 export const getDoctors = async (req, res) => {
   try {
-    const doctors = await Doctor.find().populate("userId", "name email role");
-    res.json(doctors);
+    const { page = 1, limit = 10 } = req.query;
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [doctors, total] = await Promise.all([
+      Doctor.find()
+        .populate("userId", "name email role")
+        .skip(skip)
+        .limit(Number(limit)),
+      Doctor.countDocuments()
+    ]);
+
+    res.json({
+      page: Number(page),
+      limit: Number(limit),
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      items: doctors,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 // @desc Get single doctor by ID
 export const getDoctorById = async (req, res) => {

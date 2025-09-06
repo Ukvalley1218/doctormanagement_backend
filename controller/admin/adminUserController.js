@@ -2,14 +2,38 @@ import User from "../../models/User.js";
 
 
 // @desc Get all users
+// export const getAllUsers = async (req, res) => {
+//   try {
+//     const users = await User.find().select("-otp -otpExpiry"); // hide otp fields
+//     res.json(users);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
+
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-otp -otpExpiry"); // hide otp fields
-    res.json(users);
+    const { page = 1, limit = 10 } = req.query;
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [users, total] = await Promise.all([
+      User.find().select("-otp -otpExpiry").skip(skip).limit(Number(limit)),
+      User.countDocuments()
+    ]);
+
+    res.json({
+      page: Number(page),
+      limit: Number(limit),
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      items: users,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 // @desc Get single user by ID
 export const getUserById = async (req, res) => {

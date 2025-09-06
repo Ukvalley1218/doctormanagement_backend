@@ -1,41 +1,52 @@
-  import mongoose from "mongoose";
+import mongoose from "mongoose";
+import { generateSequentialId } from "../utils/generateId.js";
 
-  const userSchema = new mongoose.Schema(
-    {
-      name: { type: String,},
-
-      email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-
-      
-      userDiscount:{type:Number,default: 0, min: 0, max: 100},
-      role: {
-        type: String,
-        enum: ["user", "doctor", "admin"], // 🔑 roles for access control
-        default: "user",
-      },
-
-      isVerified: { type: Boolean, default: false },
-
-      otp: { type: String },
-      otpExpiry: { type: Date },
-
-      // optional extras
-      phone: { type: String },
-      // structured address
-      address: {
-        apartment: { type: String },
-        landmark: { type: String },
-        address: { type: String },
-        city: { type: String },
-        state: { type: String },
-        zip: { type: String },
-      },
-
-      createdAt: { type: Date, default: Date.now },
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String },
+    userCode: { type: String, unique: true }, // Custom Sequential ID
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
-    { timestamps: true } // adds createdAt & updatedAt automatically
-  );
 
-  const User = mongoose.model("User", userSchema);
+    userDiscount: { type: Number, default: 0, min: 0, max: 100 },
+    role: {
+      type: String,
+      enum: ["user", "doctor", "admin"], // 🔑 roles for access control
+      default: "user",
+    },
 
-  export default User;
+    isVerified: { type: Boolean, default: false },
+
+    otp: { type: String },
+    otpExpiry: { type: Date },
+
+    // optional extras
+    phone: { type: String },
+    // structured address
+    address: {
+      apartment: { type: String },
+      landmark: { type: String },
+      address: { type: String },
+      city: { type: String },
+      state: { type: String },
+      zip: { type: String },
+    },
+
+    createdAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true } // adds createdAt & updatedAt automatically
+);
+// Generate sequential User ID
+userSchema.pre("save", async function (next) {
+  if (!this.isNew) return next();
+  this.userCode = await generateSequentialId("User", "USR");
+  next();
+});
+const User = mongoose.model("User", userSchema);
+
+export default User;

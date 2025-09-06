@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import { generateSequentialId } from "../utils/generateId.js";
 const doctorSchema = new mongoose.Schema(
   {
     userId: {
@@ -7,6 +7,7 @@ const doctorSchema = new mongoose.Schema(
       ref: "User",
       // required: true,
     },
+    doctorId: { type: String, unique: true }, // Custom Sequential ID
     name: { type: String },
     image: { type: String },
     specialty: { type: String, required: true },
@@ -47,5 +48,13 @@ const doctorSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+
+// Generate sequential Doctor ID
+doctorSchema.pre("save", async function (next) {
+  if (!this.isNew) return next();
+  this.doctorId = await generateSequentialId("Doctor", "DR");
+  next();
+});
 export default mongoose.model("Doctor", doctorSchema);
 

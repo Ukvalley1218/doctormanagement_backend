@@ -12,9 +12,29 @@ export const createProduct = async (req, res) => {
 };
 
 // @desc Get all products (with filters)
+// export const getProducts = async (req, res) => {
+//   try {
+//     const { category, brand, minPrice, maxPrice } = req.query;
+//     let query = {};
+
+//     if (category) query.category = category;
+//     if (brand) query.brand = brand;
+//     if (minPrice || maxPrice) {
+//       query.sellingPrice = {};
+//       if (minPrice) query.sellingPrice.$gte = Number(minPrice);
+//       if (maxPrice) query.sellingPrice.$lte = Number(maxPrice);
+//     }
+
+//     const products = await Product.find(query);
+//     res.json(products);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 export const getProducts = async (req, res) => {
   try {
-    const { category, brand, minPrice, maxPrice } = req.query;
+    const { category, brand, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
+
     let query = {};
 
     if (category) query.category = category;
@@ -25,8 +45,20 @@ export const getProducts = async (req, res) => {
       if (maxPrice) query.sellingPrice.$lte = Number(maxPrice);
     }
 
-    const products = await Product.find(query);
-    res.json(products);
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [products, total] = await Promise.all([
+      Product.find(query).skip(skip).limit(Number(limit)),
+      Product.countDocuments(query)
+    ]);
+
+    res.json({
+      page: Number(page),
+      limit: Number(limit),
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      items: products,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }

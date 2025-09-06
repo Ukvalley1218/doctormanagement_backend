@@ -1,6 +1,6 @@
 // models/Product.js
 import mongoose from "mongoose";
-
+import { generateSequentialId } from "../utils/generateId.js";
 // const productSchema = new mongoose.Schema(
 //   {
 //     name: { type: String, required: true, trim: true },
@@ -25,6 +25,7 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     category: { type: String, required: true, trim: true },
+      productId: { type: String, unique: true }, // Custom Sequential ID
     brand: { type: String, trim: true },
 
     // Pricing
@@ -45,7 +46,12 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+// Generate sequential Product ID
+productSchema.pre("save", async function (next) {
+  if (!this.isNew) return next();
+  this.productId = await generateSequentialId("Product", "PRD");
+  next();
+});
 export default mongoose.model("Product", productSchema);
 
 

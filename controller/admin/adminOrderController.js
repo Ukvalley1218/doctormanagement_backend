@@ -1,23 +1,55 @@
 import Order from "../../models/Order.js";
 
 // @desc Get all orders (with filters)
+// export const getAllOrders = async (req, res) => {
+//   try {
+//     const { status, userId } = req.query;
+//     let query = {};
+
+//     if (status) query.orderStatus = status;
+//     if (userId) query.userId = userId;
+
+//     const orders = await Order.find(query)
+//       .populate("userId", "name email")
+//       .populate("items.productId", "name category brand");
+    
+//     res.json(orders);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
+
 export const getAllOrders = async (req, res) => {
   try {
-    const { status, userId } = req.query;
+    const { status, userId, page = 1, limit = 10 } = req.query;
     let query = {};
 
     if (status) query.orderStatus = status;
     if (userId) query.userId = userId;
 
-    const orders = await Order.find(query)
-      .populate("userId", "name email")
-      .populate("items.productId", "name category brand");
-    
-    res.json(orders);
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .populate("userId", "name email")
+        .populate("items.productId", "name category brand")
+        .skip(skip)
+        .limit(Number(limit)),
+      Order.countDocuments(query),
+    ]);
+
+    res.json({
+      page: Number(page),
+      limit: Number(limit),
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      items: orders,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 // @desc Get single order by ID
 export const getOrderById = async (req, res) => {
