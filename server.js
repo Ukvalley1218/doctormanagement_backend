@@ -23,6 +23,9 @@ import adminUserRoutes from "./routes/admin/adminUserRoutes.js"
 import adminProductRoutes from "./routes/admin/adminProductRoutes.js"
 import adminDoctorRoutes from "./routes/admin/adminDoctorRoutes.js"
 import adminOrderRoutes  from "./routes/admin/adminOrderRoutes.js"
+import adminAnalyticsRoutes from "./routes/admin/adminAnalyticsRoutes.js"
+
+
 
 dotenv.config();
 
@@ -80,6 +83,7 @@ app.use("/api/admin/users",adminUserRoutes);
 app.use("/api/admin/products",adminProductRoutes);
 app.use("/api/admin/doctors",adminDoctorRoutes);
 app.use("/api/admin/orders",adminOrderRoutes);
+app.use("/api/admin/analytics",adminAnalyticsRoutes);
 
 
 app.get("/", (req, res) => {
