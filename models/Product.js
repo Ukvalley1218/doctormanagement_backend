@@ -21,31 +21,64 @@ import { generateSequentialId } from "../utils/generateId.js";
 
 
 // this schema is used when we want to add discounts , actual price and selling price
+// const productSchema = new mongoose.Schema(
+//   {
+//     name: { type: String, required: true, trim: true },
+//     category: { type: String, required: true, trim: true },
+//       productId: { type: String, unique: true }, // Custom Sequential ID
+//     brand: { type: String, trim: true },
+
+//     // Pricing
+//     actualPrice: { type: Number, required: true }, // MRP
+//     sellingPrice: { type: Number, required: true }, // Public selling price
+//     discountPrice:{type:Number,default:0,min:0,max:100},
+
+//     stock: { type: Number, required: true, default: 0 },
+//     description: { type: String, trim: true },
+
+//     // Single main image (thumbnail/cover)
+//     mainImage: { type: String },
+
+//     // Gallery images
+//     images: [{ type: String }],
+
+    
+//   },
+//   { timestamps: true }
+// );
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     category: { type: String, required: true, trim: true },
-      productId: { type: String, unique: true }, // Custom Sequential ID
+    productId: { type: String, unique: true }, // Custom Sequential ID
     brand: { type: String, trim: true },
 
     // Pricing
     actualPrice: { type: Number, required: true }, // MRP
     sellingPrice: { type: Number, required: true }, // Public selling price
-    discountPrice:{type:Number,default:0,min:0,max:100},
+    discountPrice: { type: Number, default: 0, min: 0, max: 100 },
 
+    // Stock & Description
     stock: { type: Number, required: true, default: 0 },
     description: { type: String, trim: true },
 
-    // Single main image (thumbnail/cover)
-    mainImage: { type: String },
+    // Images
+    mainImage: { type: String }, // Thumbnail / Cover
+    images: [{ type: String }], // Gallery images
 
-    // Gallery images
-    images: [{ type: String }],
+    // Manufacturer & Supplier Details
+    countryOfOrigin: { type: String, trim: true },
 
-    
+    // Product Status
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Active",
+    },
   },
   { timestamps: true }
 );
+
 // Generate sequential Product ID
 productSchema.pre("save", async function (next) {
   if (!this.isNew) return next();
