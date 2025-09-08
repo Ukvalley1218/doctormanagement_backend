@@ -29,7 +29,7 @@ export const getDoctors = async (req, res) => {
 
     const [doctors, total] = await Promise.all([
       Doctor.find()
-        .populate("userId", "name email role")
+        // .populate("userId", "name email role")
         .skip(skip)
         .limit(Number(limit)),
       Doctor.countDocuments()
