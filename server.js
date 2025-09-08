@@ -66,7 +66,7 @@ app.use("/api/appointments", appointmentRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/setting",settingroutes)
+
 app.use("/api",countRoute);
 app.use("/api/orders",orderTrackingRoute);
 
@@ -84,6 +84,7 @@ app.use("/api/admin/products",adminProductRoutes);
 app.use("/api/admin/doctors",adminDoctorRoutes);
 app.use("/api/admin/orders",adminOrderRoutes);
 app.use("/api/admin/analytics",adminAnalyticsRoutes);
+app.use("/api/admin/setting",settingroutes)
 
 
 app.get("/", (req, res) => {
