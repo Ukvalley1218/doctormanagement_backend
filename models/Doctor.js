@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { generateSequentialId } from "../utils/generateId.js";
-import { string } from "joi";
+
 const doctorSchema = new mongoose.Schema(
   {
     userId: {
