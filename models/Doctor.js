@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { generateSequentialId } from "../utils/generateId.js";
+import { string } from "joi";
 const doctorSchema = new mongoose.Schema(
   {
     userId: {
@@ -16,7 +17,8 @@ const doctorSchema = new mongoose.Schema(
     bio: { type: String },
     consultationFee:{type:Number},
     number:{type:Number},
-    calendlyurl:{type:String},
+    calendlyUrl:{type:String},
+    email:{type:String},
     // Product Status
     status: {
       type: String,
