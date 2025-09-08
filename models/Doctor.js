@@ -14,8 +14,15 @@ const doctorSchema = new mongoose.Schema(
     location: { type: String, required: true },
     rating: { type: Number, default: 0 },
     bio: { type: String },
-    rate:{type:Number},
-    calendlyLink:{type:String},
+    consultationFee:{type:Number},
+    number:{type:Number},
+    calendlyurl:{type:String},
+    // Product Status
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Active",
+    },
     reviews: [
       {
         userId: {
