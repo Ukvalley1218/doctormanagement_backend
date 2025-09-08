@@ -186,8 +186,9 @@ export const returnProduct = async (req, res) => {
 export const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.body;
+
     // find order
-    const order = await Order.findOne({ _id: orderId });
+    const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -197,31 +198,42 @@ export const cancelOrder = async (req, res) => {
       return res.status(400).json({ message: "Order already cancelled" });
     }
 
-    // let updated = false;
+    let updated = false;
 
-    // for (let item of order.items) {
-    //   if (item.orderStatus !== "Cancelled" && item.orderStatus !== "Returned") {
-    //     item.orderStatus = "Cancelled";
+    // cancel each item
+    for (let item of order.items) {
+      if (item.status !== "Cancelled" && item.status !== "Returned") {
+        item.status = "Cancelled";
 
-    //     order.returnHistory.push({
-    //       productId: item.productId,
-    //       status: "Cancelled",
-    //     });
+        // log in returnHistory
+        order.returnHistory.push({
+          productId: item.productId,
+          status: "Cancelled",
+          reason: "Order cancelled by user/admin"
+        });
 
-    //     // restore stock
-    //     await Product.findByIdAndUpdate(item.productId, {
-    //       $inc: { stock: item.quantity },
-    //     });
+        // restore stock for cancelled product
+        await Product.findByIdAndUpdate(item.productId, {
+          $inc: { stock: item.quantity }
+        });
 
-    //     updated = true;
-    //   }
-    // }
+        updated = true;
+      }
+    }
 
-    // if (!updated) {
-    //   return res.status(400).json({ message: "No items available to cancel" });
-    // }
+    if (!updated) {
+      return res.status(400).json({ message: "No items available to cancel" });
+    }
 
-    order.orderStatus = "Cancelled"; // global status
+    // update global status
+    order.orderStatus = "Cancelled";
+
+    // add to tracking history
+    order.trackingHistory.push({
+      status: "Cancelled",
+      note: "Order cancelled by user/admin"
+    });
+
     await order.save();
 
     res.json({ message: "Order cancelled successfully", order });

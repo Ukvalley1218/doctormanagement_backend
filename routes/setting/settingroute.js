@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/',setSetting);
 router.get('/',getSetting);
-router.put("/setting", updateSetting);
+router.put("/", updateSetting);
 
 
 export default router;
