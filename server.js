@@ -24,6 +24,7 @@ import adminProductRoutes from "./routes/admin/adminProductRoutes.js"
 import adminDoctorRoutes from "./routes/admin/adminDoctorRoutes.js"
 import adminOrderRoutes  from "./routes/admin/adminOrderRoutes.js"
 import adminAnalyticsRoutes from "./routes/admin/adminAnalyticsRoutes.js"
+import adminExportRoutes from "./routes/admin/adminExportRoutes.js"
 
 
 
@@ -85,6 +86,7 @@ app.use("/api/admin/doctors",adminDoctorRoutes);
 app.use("/api/admin/orders",adminOrderRoutes);
 app.use("/api/admin/analytics",adminAnalyticsRoutes);
 app.use("/api/admin/setting",settingroutes)
+app.use("/api/admin/exports",adminExportRoutes);
 
 
 app.get("/", (req, res) => {
