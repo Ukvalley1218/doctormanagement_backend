@@ -39,6 +39,7 @@ connectDB();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://doctor.valleyhoster.com",
+  "https://admindoctor.valleyhoster.com",
 ];
 
 app.use(
