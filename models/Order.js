@@ -66,8 +66,8 @@ const orderSchema = new mongoose.Schema(
         quantity: Number,
         status: {
           type: String,
-          enum: ["purchased", "returned"],
-          default: "purchased",
+          enum: ["Purchased", "Returned","Cancelled"],
+          default: "Purchased",
         },
       },
     ],
@@ -130,7 +130,7 @@ const orderSchema = new mongoose.Schema(
     productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
     status: {
       type: String,
-      enum: ["Requested", "Approved", "Rejected", "Refunded"],
+      enum: ["Requested", "Approved", "Rejected", "Refunded",],
       default: "Requested",
     },
     reason: String,

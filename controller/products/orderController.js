@@ -205,12 +205,7 @@ export const cancelOrder = async (req, res) => {
       if (item.status !== "Cancelled" && item.status !== "Returned") {
         item.status = "Cancelled";
 
-        // log in returnHistory
-        order.returnHistory.push({
-          productId: item.productId,
-          status: "Cancelled",
-          reason: "Order cancelled by user/admin"
-        });
+        
 
         // restore stock for cancelled product
         await Product.findByIdAndUpdate(item.productId, {
