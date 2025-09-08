@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
     userDiscount: { type: Number, default: 0, min: 0, max: 100 },
     role: {
       type: String,
-      enum: ["user", "doctor", "admin"], // 🔑 roles for access control
+      enum: ["user", "wholesaler", "admin"], // 🔑 roles for access control
       default: "user",
     },
 
@@ -26,7 +26,10 @@ const userSchema = new mongoose.Schema(
     otpExpiry: { type: Date },
 
     // optional extras
+    // 👇 Added new fields
     phone: { type: String },
+    gender: { type: String, enum: ["Male", "Female", "Other"] },
+    dob: { type: Date },
     // structured address
     address: {
       apartment: { type: String },
