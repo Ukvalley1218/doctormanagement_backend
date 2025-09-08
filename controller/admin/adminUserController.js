@@ -14,6 +14,10 @@ import User from "../../models/User.js";
 export const createUser = async (req,res)=>{
   try {
     const user = new User(req.body);
+    const existuser = User.findOne(user.email);
+    if(existuser){
+      return res.status(404).json({message:"This Email Has been Already Used ,Try Another Email."})
+    }
     await user.save();
     res.status(201).json({ message: "User created successfully", user });
     
