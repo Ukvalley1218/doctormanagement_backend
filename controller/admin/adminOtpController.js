@@ -51,3 +51,34 @@ export const verifyOtpAndResetPassword = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+export const resendOtp = async (req,res)=>{
+   try {
+    const { email } = req.body;
+
+    if (!email) return res.status(400).json({ msg: "Email is required" });
+
+    const admin = await Admin.findOne({ email });
+    if (!admin) return res.status(400).json({ msg: "admin not found" });
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    admin.otp = otp;
+    admin.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+    admin.isVerified = false;
+    await admin.save();
+
+    // Send OTP again
+    await sendEmail(
+      email,
+      "Your OTP (Resent)",
+      `Your new OTP is ${otp}. It expires in 10 minutes.`
+    );
+
+    res.json({ msg: "New OTP sent to your email" });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+
+};

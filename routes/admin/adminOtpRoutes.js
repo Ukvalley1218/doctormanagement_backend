@@ -9,4 +9,7 @@ router.post('/send-otp',sendOtp);
 // verify otp and reset password 
 router.post('/reset-password',verifyOtpAndResetPassword);
 
+// resend otp 
+router.post('/resend-otp',)
+
 export default router;
