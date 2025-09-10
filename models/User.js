@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
     otp: { type: String },
     otpExpiry: { type: Date },
 
+    image:{type:String},
     // optional extras
     // 👇 Added new fields
     phone: { type: String },
@@ -39,6 +40,9 @@ const userSchema = new mongoose.Schema(
       state: { type: String },
       zip: { type: String },
     },
+    // in models/User.js (add fields)
+    avatarUrl: { type: String },
+    avatarPublicId: { type: String },
 
     createdAt: { type: Date, default: Date.now },
   },

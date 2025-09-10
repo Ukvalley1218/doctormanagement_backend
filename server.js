@@ -14,6 +14,7 @@ import productRoutes from "./routes/products/productRoutes.js";
 import settingroutes from "./routes/setting/settingroute.js"
 import countRoute from "./routes/products/countRoute.js"
 import orderTrackingRoute from "./routes/products/orderTrackingRoutes.js"
+import uploadRoutes from "./routes/cloudinary/uploadRoutes.js"
 
 // admin routes imports
 import orderTrackingRoutes from "./routes/admin/orderTrackingRoutes.js"
@@ -55,7 +56,7 @@ app.use(
     credentials: true, // allow cookies / auth headers
   })
 );
-// ---------------------------------
+
 
 // middleware
 app.use(express.json());
@@ -71,6 +72,7 @@ app.use("/api/orders", orderRoutes);
 
 app.use("/api",countRoute);
 app.use("/api/orders",orderTrackingRoute);
+app.use("/api/upload", uploadRoutes);
 
 
 

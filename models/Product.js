@@ -19,7 +19,6 @@ import { generateSequentialId } from "../utils/generateId.js";
 //   { timestamps: true }
 // );
 
-
 // this schema is used when we want to add discounts , actual price and selling price
 // const productSchema = new mongoose.Schema(
 //   {
@@ -42,7 +41,6 @@ import { generateSequentialId } from "../utils/generateId.js";
 //     // Gallery images
 //     images: [{ type: String }],
 
-    
 //   },
 //   { timestamps: true }
 // );
@@ -75,6 +73,10 @@ const productSchema = new mongoose.Schema(
       enum: ["Active", "Inactive"],
       default: "Active",
     },
+
+    // in models/Product.js (add fields next to images)
+    mainImagePublicId: { type: String },
+    imagesPublicIds: [{ type: String }],
   },
   { timestamps: true }
 );
@@ -86,8 +88,6 @@ productSchema.pre("save", async function (next) {
   next();
 });
 export default mongoose.model("Product", productSchema);
-
-
 
 // import mongoose from "mongoose";
 
@@ -137,16 +137,12 @@ export default mongoose.model("Product", productSchema);
 
 // export default mongoose.model("Product", productSchema);
 
-
-
-
-
 // use later
 // Personalized discounts (admin can assign per user)
-    // userDiscounts: [
-    //   {
-    //     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    //     discountPercentage: { type: Number, default: 0 }, // e.g. 10 means 10% off
-    //     discountPrice: { type: Number }, // store pre-calculated price if needed
-    //   },
-    // ],
+// userDiscounts: [
+//   {
+//     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+//     discountPercentage: { type: Number, default: 0 }, // e.g. 10 means 10% off
+//     discountPrice: { type: Number }, // store pre-calculated price if needed
+//   },
+// ],

@@ -12,7 +12,7 @@ import Order from "../../models/Order.js";
 //     const orders = await Order.find(query)
 //       .populate("userId", "name email")
 //       .populate("items.productId", "name category brand");
-    
+
 //     res.json(orders);
 //   } catch (err) {
 //     res.status(500).json({ message: "Server error", error: err.message });
@@ -49,7 +49,6 @@ export const getAllOrders = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
 
 // @desc Get single order by ID
 export const getOrderById = async (req, res) => {
@@ -92,8 +91,10 @@ export const updateReturnStatus = async (req, res) => {
 
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    const returnItem = order.returnHistory.find(r => r.productId.toString() === productId);
-console.log(returnItem)
+    const returnItem = order.returnHistory.find(
+      (r) => r.productId.toString() === productId
+    );
+    console.log(returnItem);
     if (!returnItem) {
       return res.status(404).json({ message: "Return request not found" });
     }

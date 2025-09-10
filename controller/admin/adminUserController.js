@@ -14,7 +14,7 @@ import User from "../../models/User.js";
 export const createUser = async (req,res)=>{
   try {
     const user = new User(req.body);
-    const existuser = User.findOne(user.email);
+    const existuser =await User.findOne({email:user.email});
     if(existuser){
       return res.status(404).json({message:"This Email Has been Already Used ,Try Another Email."})
     }

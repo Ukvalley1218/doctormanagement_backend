@@ -19,6 +19,8 @@ const doctorSchema = new mongoose.Schema(
     number:{type:Number},
     calendlyUrl:{type:String},
     email:{type:String},
+    // in models/Doctor.js (add field)
+imagePublicId: { type: String },
     // Product Status
     status: {
       type: String,
