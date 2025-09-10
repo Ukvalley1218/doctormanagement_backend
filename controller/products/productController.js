@@ -1,19 +1,50 @@
 import Product from "../../models/Product.js";
 
 // Get all produuucts with filters
+// export const getProducts = async (req, res) => {
+//   try {
+//     const { category, brand, minPrice, maxPrice, search } = req.query;
+//     let query = {};
+
+//     if (category) query.category = category;
+//     if (brand) query.brand = brand;
+//     // price filter
+//     if (minPrice || maxPrice) {
+//       query.sellingPrice = {};
+//       if (minPrice) query.sellingPrice.$gte = Number(minPrice);
+//       if (maxPrice) query.sellingPrice.$lte = Number(maxPrice);
+//     }
+//     // search filter (name, description, brand)
+//     if (search) {
+//       query.$or = [
+//         { name: { $regex: search, $options: "i" } }, // case-insensitive
+//         { description: { $regex: search, $options: "i" } },
+//         { brand: { $regex: search, $options: "i" } },
+//       ];
+//     }
+
+
+//     const products = await Product.find(query);
+//     res.json(products);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 export const getProducts = async (req, res) => {
   try {
-    const { category, brand, minPrice, maxPrice, search } = req.query;
+    const { category, brand, minPrice, maxPrice, search, page = 1, limit = 10 } = req.query;
     let query = {};
 
     if (category) query.category = category;
     if (brand) query.brand = brand;
+
     // price filter
     if (minPrice || maxPrice) {
       query.sellingPrice = {};
       if (minPrice) query.sellingPrice.$gte = Number(minPrice);
       if (maxPrice) query.sellingPrice.$lte = Number(maxPrice);
     }
+
     // search filter (name, description, brand)
     if (search) {
       query.$or = [
@@ -23,13 +54,29 @@ export const getProducts = async (req, res) => {
       ];
     }
 
+    // convert pagination params
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
 
-    const products = await Product.find(query);
-    res.json(products);
+    // total count
+    const totalProducts = await Product.countDocuments(query);
+
+    // fetch with pagination
+    const products = await Product.find(query)
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
+
+    res.json({
+      totalProducts,
+      page: pageNumber,
+      totalPages: Math.ceil(totalProducts / limitNumber),
+      products,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 // Get product by ID
 export const getProductById = async (req, res) => {

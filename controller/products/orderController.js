@@ -83,15 +83,44 @@ export const placeOrder = async (req, res) => {
 };
 
 // Get my orders
+// export const getMyOrders = async (req, res) => {
+//   try {
+//     const orders = await Order.find({ userId: req.user.id })
+//       .populate({
+//         path: "items.productId",
+//         model: "Product",
+//       })
+//       .sort({ createdAt: -1 });
+//     res.json(orders);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 export const getMyOrders = async (req, res) => {
   try {
+    let { page = 1, limit = 10 } = req.query; // default page=1, limit=10
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    // total count
+    const totalOrders = await Order.countDocuments({ userId: req.user.id });
+
+    // find orders with pagination
     const orders = await Order.find({ userId: req.user.id })
       .populate({
         path: "items.productId",
         model: "Product",
       })
-      .sort({ createdAt: -1 });
-    res.json(orders);
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({
+      totalOrders,
+      page,
+      totalPages: Math.ceil(totalOrders / limit),
+      orders,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
@@ -121,7 +150,7 @@ export const getOrderById = async (req, res) => {
 // Return a specific product from an order
 export const returnProduct = async (req, res) => {
   try {
-    const { orderId, productId,reason } = req.body; // productIds = [id1, id2, ...]
+    const { orderId, productId, reason } = req.body; // productIds = [id1, id2, ...]
 
     if (!Array.isArray(productId) || productId.length === 0) {
       return res
@@ -155,8 +184,8 @@ export const returnProduct = async (req, res) => {
 
       // add entry to returnHistory
       order.returnHistory.push({
-        productId:pid,
-        reason:reason || "Not specified",
+        productId: pid,
+        reason: reason || "Not specified",
         status: "Requested",
       });
 
@@ -205,11 +234,9 @@ export const cancelOrder = async (req, res) => {
       if (item.status !== "Cancelled" && item.status !== "Returned") {
         item.status = "Cancelled";
 
-        
-
         // restore stock for cancelled product
         await Product.findByIdAndUpdate(item.productId, {
-          $inc: { stock: item.quantity }
+          $inc: { stock: item.quantity },
         });
 
         updated = true;
@@ -226,7 +253,7 @@ export const cancelOrder = async (req, res) => {
     // add to tracking history
     order.trackingHistory.push({
       status: "Cancelled",
-      note: "Order cancelled by user/admin"
+      note: "Order cancelled by user/admin",
     });
 
     await order.save();
@@ -236,9 +263,6 @@ export const cancelOrder = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
-
-
 
 export const generateInvoice = async (req, res) => {
   try {
@@ -335,7 +359,7 @@ export const generateInvoice = async (req, res) => {
 
     // 🔹 Totals Section (right-aligned like Amazon)
     const summaryTop = y + 20;
-    doc.fontSize(12).text("Summary", 400, summaryTop);
+    doc.fontSize(12).text("Summary", 380, summaryTop);
 
     doc
       .fontSize(10)
@@ -343,11 +367,18 @@ export const generateInvoice = async (req, res) => {
       .text(`Delivery Fee: $${order.deliverfee}`, 380, summaryTop + 40)
       .text(`Discount: $${order.discountAmount || 0}`, 380, summaryTop + 60);
 
+    // Line separator
+    doc.moveTo(40, 90).lineTo(550, 90).stroke();
     doc
       .fontSize(12)
-      .text(`Grand Total: $${order.totalPrice.toFixed(2)}`, 400, summaryTop + 80, {
-        bold: true,
-      });
+      .text(
+        `Grand Total: $${order.totalPrice.toFixed(2)}`,
+        380,
+        summaryTop + 80,
+        {
+          bold: true,
+        }
+      );
 
     // 🔹 Footer
     doc.moveDown(4);
