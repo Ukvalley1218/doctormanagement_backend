@@ -1,5 +1,5 @@
 import express from "express";
-import { sendOtp,verifyOtpAndResetPassword } from "../../controller/admin/adminOtpController.js";
+import { sendOtp,verifyOtpAndResetPassword,resendOtp } from "../../controller/admin/adminOtpController.js";
 
 const router = express.Router();
 
@@ -10,6 +10,6 @@ router.post('/send-otp',sendOtp);
 router.post('/reset-password',verifyOtpAndResetPassword);
 
 // resend otp 
-router.post('/resend-otp',)
+router.post('/resend-otp',resendOtp);
 
 export default router;
