@@ -192,8 +192,8 @@ export const createOrderAndPayment = async (req, res) => {
         quantity: i.quantity,
       })),
       mode: "payment",
-      success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/payment-cancel`,
+      success_url: null,
+      cancel_url: null,
       metadata: {
         orderId: order._id.toString(),
         orderCode: order.orderId,
