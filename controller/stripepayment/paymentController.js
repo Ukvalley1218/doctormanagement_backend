@@ -176,7 +176,7 @@ export const createOrderAndPayment = async (req, res) => {
       orderStatus: "Placed",
       trackingHistory: [{ status: "Placed", note: "Order created, awaiting payment" }]
     });
-    // await order.save();
+    await order.save();
 
     // ✅ Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
