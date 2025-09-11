@@ -66,7 +66,7 @@ const orderSchema = new mongoose.Schema(
         quantity: Number,
         status: {
           type: String,
-          enum: ["Purchased", "Returned","Cancelled"],
+          enum: ["Purchased", "Returned", "Cancelled"],
           default: "Purchased",
         },
       },
@@ -104,8 +104,8 @@ const orderSchema = new mongoose.Schema(
       default: "Placed",
     },
     stripePaymentIntentId: { type: String },
-stripePaymentStatus: { type: String }, // e.g. requires_payment_method, succeeded
-paymentDetails: { type: mongoose.Schema.Types.Mixed }, // store stripe object or summary
+    stripePaymentStatus: { type: String }, // e.g. requires_payment_method, succeeded
+    paymentDetails: { type: mongoose.Schema.Types.Mixed }, // store stripe object or summary
     trackingHistory: [
       {
         status: {
@@ -129,17 +129,17 @@ paymentDetails: { type: mongoose.Schema.Types.Mixed }, // store stripe object or
       { _id: false },
     ],
     returnHistory: [
-  {
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-    status: {
-      type: String,
-      enum: ["Requested", "Approved", "Rejected", "Refunded",],
-      default: "Requested",
-    },
-    reason: String,
-    createdAt: { type: Date, default: Date.now }
-  }
-]
+      {
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+        status: {
+          type: String,
+          enum: ["Requested", "Approved", "Rejected", "Refunded"],
+          default: "Requested",
+        },
+        reason: String,
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -45,7 +45,7 @@ export const placeOrder = async (req, res) => {
         name: i.productId.name,
         description: i.description,
         image: i.image,
-        price: i.productId.sellingPrice,
+        price: i.productId.actualPrice,
         quantity: i.quantity,
       })),
       totalPrice,
