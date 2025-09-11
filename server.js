@@ -29,7 +29,9 @@ import adminExportRoutes from "./routes/admin/adminExportRoutes.js"
 
 // promo code imports
 import promoCodeRoutes from "./routes/promocode/promoCodeRoutes.js"
-
+// stripe imports
+import paymentRoutes from "./routes/stripe/paymentRoutes.js";
+import { stripeWebhookHandler } from "./controller/stripepayment/paymentController.js";
 
 dotenv.config();
 
@@ -79,7 +81,9 @@ app.use("/api/upload", uploadRoutes);
 
 // promo code routes
 app.use("/api/promocode",promoCodeRoutes);
-
+// stripe payment routes
+app.use("/api/payment", paymentRoutes);
+app.post("/api/payment/webhook", express.raw({ type: "application/json" }),stripeWebhookHandler);
 
 
 // admin routes

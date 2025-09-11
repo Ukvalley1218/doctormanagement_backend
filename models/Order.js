@@ -103,6 +103,9 @@ const orderSchema = new mongoose.Schema(
       ],
       default: "Placed",
     },
+    stripePaymentIntentId: { type: String },
+stripePaymentStatus: { type: String }, // e.g. requires_payment_method, succeeded
+paymentDetails: { type: mongoose.Schema.Types.Mixed }, // store stripe object or summary
     trackingHistory: [
       {
         status: {

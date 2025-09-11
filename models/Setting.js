@@ -5,7 +5,10 @@ const Settingschema= new mongoose.Schema({
     deliverfee:{type:Number},
     phone:{type:Number},
     email:{type:String},
-    logo:{type:String}
+    logo:{type:String},
+    stripekey:{type:String},
+    stripesaltkey:{type:String},
+    stripepublishablekey:{type:String},
 })
 
 export default mongoose.model("Setting",Settingschema);

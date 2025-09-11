@@ -75,6 +75,22 @@ export const applyPromoCode = async (req, res) => {
   }
 };
 
+// get promocode by id  
+export const getpromocodebyid = async (req,res)=>{
+try {
+    const {id} = req.params;
+    const promo = await Promocode.findById(id);
+    if (!promo) return res.status(404).json({ message: "Promo code not found" });
+    res.json(promo);
+    
+
+
+    
+} catch (error) {
+    res.status(500).json({ message: "Server error", error: err.message });
+}
+}
+
 // Update Promo Code (Admin only)
 export const updatePromoCode = async (req, res) => {
   try {
