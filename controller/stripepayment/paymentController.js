@@ -192,8 +192,8 @@ export const createOrderAndPayment = async (req, res) => {
         quantity: i.quantity,
       })),
       mode: "payment",
-      success_url: null,
-      cancel_url: null,
+      success_url: `https://doctor.valleyhoster.com/checkout-success`,
+      cancel_url: `https://doctor.valleyhoster.com/apointment-success`,
       metadata: {
         orderId: order._id.toString(),
         orderCode: order.orderId,
