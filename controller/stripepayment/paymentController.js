@@ -71,7 +71,7 @@ import Setting from "../../models/Setting.js";
 
 export const createOrderAndPayment = async (req, res) => {
   try {
-    const { session_id, shippingDetails, deliverfee = 0, discountAmount = 0 } = req.body;
+    const { session_id, shippingDetails, deliverfee, discountAmount ,totalPrice,productValue} = req.body;
     if (!session_id) return res.status(400).json({ message: "Session ID is required" });
 
     // 👉 Get Stripe keys from DB
