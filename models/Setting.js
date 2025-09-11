@@ -9,6 +9,7 @@ const Settingschema= new mongoose.Schema({
     stripekey:{type:String},
     stripesaltkey:{type:String},
     stripepublishablekey:{type:String},
+    stripecurrency:{type:String},
 })
 
 export default mongoose.model("Setting",Settingschema);
