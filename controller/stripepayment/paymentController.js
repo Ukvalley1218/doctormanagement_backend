@@ -159,24 +159,24 @@ export const createOrderAndPayment = async (req, res) => {
     }
 
     // ✅ Create order in DB (payment still pending)
-    const order = new Order({
-      userId: req.user.id,
-      items: cart.items.map(i => ({
-        productId: i.productId._id,
-        name: i.productId.name,
-        price: i.productId.sellingPrice,
-        quantity: i.quantity
-      })),
-      totalPrice,
-      deliverfee,
-      productValue,
-      discountAmount,
-      shippingDetails,
-      paymentStatus: "pending",
-      orderStatus: "Placed",
-      trackingHistory: [{ status: "Placed", note: "Order created, awaiting payment" }]
-    });
-    await order.save();
+    // const order = new Order({
+    //   userId: req.user.id,
+    //   items: cart.items.map(i => ({
+    //     productId: i.productId._id,
+    //     name: i.productId.name,
+    //     price: i.productId.sellingPrice,
+    //     quantity: i.quantity
+    //   })),
+    //   totalPrice,
+    //   deliverfee,
+    //   productValue,
+    //   discountAmount,
+    //   shippingDetails,
+    //   paymentStatus: "pending",
+    //   orderStatus: "Placed",
+    //   trackingHistory: [{ status: "Placed", note: "Order created, awaiting payment" }]
+    // });
+    // await order.save();
 
     // ✅ Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
