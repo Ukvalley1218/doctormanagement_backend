@@ -15,12 +15,12 @@ const doctorSchema = new mongoose.Schema(
     location: { type: String, required: true },
     rating: { type: Number, default: 0 },
     bio: { type: String },
-    consultationFee:{type:Number},
-    number:{type:Number},
-    calendlyUrl:{type:String},
-    email:{type:String},
+    consultationFee: { type: Number },
+    number: { type: Number },
+    calendlyUrl: { type: String },
+    email: { type: String },
     // in models/Doctor.js (add field)
-imagePublicId: { type: String },
+    imagePublicId: { type: String },
     // Product Status
     status: {
       type: String,
@@ -48,18 +48,19 @@ imagePublicId: { type: String },
       { timestamps: true },
     ],
     availableSlots: [
-  {
-    date: { type: Date, required: true },
-    time: { type: String, required: true },
-    status: { type: String, enum: ["available", "confirmed"], default: "available" }
-  },
-],
-
+      {
+        date: { type: Date, required: true },
+        time: { type: String, required: true },
+        status: {
+          type: String,
+          enum: ["available", "confirmed"],
+          default: "available",
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
-
-
 
 // Generate sequential Doctor ID
 doctorSchema.pre("save", async function (next) {
@@ -68,4 +69,3 @@ doctorSchema.pre("save", async function (next) {
   next();
 });
 export default mongoose.model("Doctor", doctorSchema);
-

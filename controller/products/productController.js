@@ -123,3 +123,47 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+export const addReviews = async (req,res)=>{
+  try {
+    const {rating,comment}=req.body;
+    const {productId}=req.params;
+
+    // find product
+    const product =  await Product.findById(productId);
+    if(!product){
+      return res.status(404).json({msg:"product not found"})
+    }
+
+
+    // check if already reviewd
+    const alreadyReviewed = product.reviews.find(
+      (r) => r.userId.toString() === req.user.id
+    );
+    if(alreadyReviewed){
+      return res.status(400).json({msg:"you already reviewd this product"})
+    }
+
+    // push review
+    const review = {
+      userId: req.user.id, // from auth middleware
+      rating,
+      comment,
+    };
+
+    product.reviews.push(review);
+
+    // update average rating
+    product.rating =
+      product.reviews.reduce((acc, item) => acc + item.rating, 0) /
+      product.reviews.length;
+
+    await product.save();
+
+    res.status(201).json({ msg: "Review added successfully", product });
+
+
+  } catch (error) {
+    res.status(500).json({message:"Error",error:error.message})
+  }
+}

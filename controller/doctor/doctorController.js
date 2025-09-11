@@ -92,7 +92,7 @@ export const addDoctor = async (req, res) => {
 
 export const addReviews = async (req,res)=>{
   try {
-    const {rating,comment}=res.body;
+    const {rating,comment}=req.body;
     const {doctorId}=req.params;
 
     // find doctor
