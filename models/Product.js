@@ -73,6 +73,8 @@ const productSchema = new mongoose.Schema(
       enum: ["Active", "Inactive"],
       default: "Active",
     },
+    dosage:{type:String},
+    sideeffects:{type:String},
     reviews: [
       {
         userId: {
@@ -80,6 +82,7 @@ const productSchema = new mongoose.Schema(
           ref: "User",
           required: true,
         },
+        name: { type: String }, // ✅ store user name
         rating: {
           type: Number,
           required: true,
@@ -90,6 +93,7 @@ const productSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
+         createdAt: { type: Date, default: Date.now }, // ✅ add timestamp
       },
       { timestamps: true },
     ],

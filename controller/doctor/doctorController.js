@@ -1,5 +1,5 @@
+import User from "../../models/User.js";
 import Doctor from "../../models/Doctor.js";
-
 // @desc Get all doctors with filters
 // export const getDoctors = async (req, res) => {
 //   try {
@@ -109,12 +109,16 @@ export const addReviews = async (req,res)=>{
     if(alreadyReviewed){
       return res.status(400).json({msg:"you already reviewd this doctor"})
     }
+    // get user details
+    const user = await User.findById(req.user.id).select("name");
 
     // push review
     const review = {
       userId: req.user.id, // from auth middleware
+      name: user?.name ,
       rating,
       comment,
+      createdAt: new Date(),
     };
 
     doctor.reviews.push(review);

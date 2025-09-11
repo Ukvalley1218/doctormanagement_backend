@@ -34,6 +34,7 @@ const doctorSchema = new mongoose.Schema(
           ref: "User",
           required: true,
         },
+        name: { type: String }, // ✅ store user name
         rating: {
           type: Number,
           required: true,
@@ -44,6 +45,7 @@ const doctorSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
+        createdAt: { type: Date, default: Date.now }, // ✅ add timestamp
       },
       { timestamps: true },
     ],

@@ -1,3 +1,4 @@
+import User from "../../models/User.js";
 import Product from "../../models/Product.js";
 
 // Get all produuucts with filters
@@ -143,12 +144,16 @@ export const addReviews = async (req,res)=>{
     if(alreadyReviewed){
       return res.status(400).json({msg:"you already reviewd this product"})
     }
+    // get user details
+    const user = await User.findById(req.user.id).select("name");
 
     // push review
     const review = {
       userId: req.user.id, // from auth middleware
+      name:user?.name || "Anonymous",
       rating,
       comment,
+      createdAt: new Date(),
     };
 
     product.reviews.push(review);
