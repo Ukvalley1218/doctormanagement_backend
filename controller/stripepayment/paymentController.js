@@ -67,11 +67,7 @@ import Setting from "../../models/Setting.js";
 //   }
 // };
 
-import Stripe from "stripe";
-import Order from "../../models/Order.js";
-import Cart from "../../models/Cart.js";
-import Product from "../../models/Product.js";
-import Setting from "../../models/Setting.js";
+
 
 export const createOrderAndPayment = async (req, res) => {
   try {
