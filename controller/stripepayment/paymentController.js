@@ -2,13 +2,89 @@ import Stripe from "stripe";
 import Order from "../../models/Order.js";
 import Cart from "../../models/Cart.js";
 import Product from "../../models/Product.js";
+import Setting from "../../models/Setting.js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2022-11-15" });
+
+
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2022-11-15" });
+
+// export const createOrderAndPayment = async (req, res) => {
+//   try {
+//     const { session_id, shippingDetails, deliverfee = 0, discountAmount = 0 } = req.body;
+//     if (!session_id) return res.status(400).json({ message: "Session ID is required" });
+
+//     // load cart
+//     const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
+//     if (!cart || cart.items.length === 0) {
+//       return res.status(400).json({ message: "Cart is empty" });
+//     }
+
+//     // calculate totals
+//     const productValue = cart.items.reduce((sum, item) => sum + item.productId.sellingPrice * item.quantity, 0);
+//     const totalPrice = productValue + deliverfee - discountAmount;
+
+//     // create order in DB with pending payment
+//     const order = new Order({
+//       userId: req.user.id,
+//       items: cart.items.map(i => ({
+//         productId: i.productId._id,
+//         name: i.productId.name,
+//         price: i.productId.sellingPrice,
+//         quantity: i.quantity
+//       })),
+//       totalPrice,
+//       deliverfee,
+//       productValue,
+//       discountAmount,
+//       shippingDetails,
+//       paymentStatus: "pending",
+//       orderStatus: "Placed",
+//       trackingHistory: [{ status: "Placed", note: "Order created, awaiting payment" }]
+//     });
+
+//     await order.save();
+
+//     // Stripe PaymentIntent
+//     const paymentIntent = await stripe.paymentIntents.create({
+//       amount: Math.round(totalPrice * 100),
+//       currency: process.env.STRIPE_CURRENCY || "inr",
+//       metadata: { orderId: order._id.toString(), orderCode: order.orderId }
+//     });
+
+//     // save stripe details
+//     order.stripePaymentIntentId = paymentIntent.id;
+//     order.stripePaymentStatus = paymentIntent.status;
+//     await order.save();
+
+//     res.status(201).json({
+//       message: "Order created, payment initiated",
+//       orderId: order._id,
+//       orderCode: order.orderId,
+//       clientSecret: paymentIntent.client_secret
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
+
+import Stripe from "stripe";
+import Order from "../../models/Order.js";
+import Cart from "../../models/Cart.js";
+import Product from "../../models/Product.js";
+import Setting from "../../models/Setting.js";
 
 export const createOrderAndPayment = async (req, res) => {
   try {
     const { session_id, shippingDetails, deliverfee = 0, discountAmount = 0 } = req.body;
     if (!session_id) return res.status(400).json({ message: "Session ID is required" });
+
+    // 👉 Get Stripe keys from DB
+    const setting = await Setting.findOne();
+    if (!setting || !setting.stripekey) {
+      return res.status(500).json({ message: "Stripe configuration missing" });
+    }
+
+    const stripe = new Stripe(setting.stripekey, { apiVersion: "2022-11-15" });
 
     // load cart
     const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
@@ -17,10 +93,13 @@ export const createOrderAndPayment = async (req, res) => {
     }
 
     // calculate totals
-    const productValue = cart.items.reduce((sum, item) => sum + item.productId.sellingPrice * item.quantity, 0);
+    const productValue = cart.items.reduce(
+      (sum, item) => sum + item.productId.sellingPrice * item.quantity,
+      0
+    );
     const totalPrice = productValue + deliverfee - discountAmount;
 
-    // create order in DB with pending payment
+    // create order
     const order = new Order({
       userId: req.user.id,
       items: cart.items.map(i => ({
@@ -44,11 +123,10 @@ export const createOrderAndPayment = async (req, res) => {
     // Stripe PaymentIntent
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(totalPrice * 100),
-      currency: process.env.STRIPE_CURRENCY || "inr",
+      currency: setting.stripecurrency || "inr", // you can also add currency in DB
       metadata: { orderId: order._id.toString(), orderCode: order.orderId }
     });
 
-    // save stripe details
     order.stripePaymentIntentId = paymentIntent.id;
     order.stripePaymentStatus = paymentIntent.status;
     await order.save();
@@ -57,12 +135,14 @@ export const createOrderAndPayment = async (req, res) => {
       message: "Order created, payment initiated",
       orderId: order._id,
       orderCode: order.orderId,
-      clientSecret: paymentIntent.client_secret
+      clientSecret: paymentIntent.client_secret,
+      publishableKey: setting.stripepublishablekey // 👈 send to frontend
     });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 export const stripeWebhookHandler = async (req, res) => {
   const sig = req.headers["stripe-signature"];
@@ -101,3 +181,4 @@ export const stripeWebhookHandler = async (req, res) => {
     res.status(500).send();
   }
 };
+
