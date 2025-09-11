@@ -5,7 +5,10 @@ export const createPromoCode = async (req, res) => {
   try {
     const { code, discountPercentage, expiryDate, usageLimit } = req.body;
 
-    const promo = new PromoCode({
+    if (!code || !discountPercentage || !expiryDate || !usageLimit) {
+      return res.status(400).json({ message: "Invalid data" });
+    }
+    const promo = new Promocode({
       code,
       discountPercentage,
       expiryDate,
@@ -22,7 +25,7 @@ export const createPromoCode = async (req, res) => {
 // ✅ Admin: Get all promo codes
 export const getAllPromoCodes = async (req, res) => {
   try {
-    const promos = await PromoCode.find();
+    const promos = await Promocode.find();
     res.json(promos);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -33,7 +36,7 @@ export const getAllPromoCodes = async (req, res) => {
 export const deletePromoCode = async (req, res) => {
   try {
     const { id } = req.params;
-    const promo = await PromoCode.findByIdAndDelete(id);
+    const promo = await Promocode.findByIdAndDelete(id);
 
     if (!promo) return res.status(404).json({ message: "Promo code not found" });
 
@@ -50,7 +53,7 @@ export const applyPromoCode = async (req, res) => {
 
     if (!code) return res.status(400).json({ message: "Promo code required" });
 
-    const promo = await PromoCode.findOne({ code: code.toUpperCase(), isActive: true });
+    const promo = await Promocode.findOne({ code: code.toUpperCase(), isActive: true });
 
     if (!promo) return res.status(404).json({ message: "Invalid promo code" });
 
@@ -67,6 +70,24 @@ export const applyPromoCode = async (req, res) => {
       message: "Promo code applied",
       discountPercentage: promo.discountPercentage,
     });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// Update Promo Code (Admin only)
+export const updatePromoCode = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body; // code, discountPercentage, expiryDate, isActive, usageLimit
+
+    const promo = await Promocode.findByIdAndUpdate(id, updates, { new: true });
+
+    if (!promo) {
+      return res.status(404).json({ message: "Promo code not found" });
+    }
+
+    res.json({ message: "Promo code updated successfully", promo });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }

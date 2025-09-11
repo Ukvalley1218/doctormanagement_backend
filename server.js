@@ -27,6 +27,8 @@ import adminOrderRoutes  from "./routes/admin/adminOrderRoutes.js"
 import adminAnalyticsRoutes from "./routes/admin/adminAnalyticsRoutes.js"
 import adminExportRoutes from "./routes/admin/adminExportRoutes.js"
 
+// promo code imports
+import promoCodeRoutes from "./routes/promocode/promoCodeRoutes.js"
 
 
 dotenv.config();
@@ -75,7 +77,8 @@ app.use("/api/orders",orderTrackingRoute);
 app.use("/api/upload", uploadRoutes);
 
 
-
+// promo code routes
+app.use("/api/promocode",promoCodeRoutes);
 
 
 
