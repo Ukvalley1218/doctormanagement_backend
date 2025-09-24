@@ -28,6 +28,7 @@
     "nodemailer": "^7.0.5",
     "nodemon": "^3.1.10",
     "pdfkit": "^0.17.2",
+    "sib-api-v3-sdk": "^8.5.0",
     "streamifier": "^0.1.1",
     "stripe": "^18.5.0",
     "zeptomail": "^6.2.1"
