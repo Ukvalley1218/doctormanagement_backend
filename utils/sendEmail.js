@@ -8,7 +8,7 @@ const sendEmail = async (to, subject, text) => {
     const transporter = nodemailer.createTransport({
       host: process.env.BREVO_HOST,
       port: process.env.BREVO_PORT,
-      secure: process.env.BREVO_PORT == 465, // SSL if 465
+      secure: false,
       auth: {
         user: process.env.BREVO_USER,
         pass: process.env.BREVO_PASS,
@@ -16,7 +16,7 @@ const sendEmail = async (to, subject, text) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"Your App Name" <${process.env.BREVO_USER}>`,
+      from: `"Your App Name" <tejaskhairnar.ukvalley@gmail.com>`,
       to,
       subject,
       text,

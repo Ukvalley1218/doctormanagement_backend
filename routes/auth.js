@@ -42,6 +42,7 @@ router.post("/login", async (req, res) => {
 });
 
 
+
 // ===================== VERIFY OTP =====================
 router.post("/verify-otp", async (req, res) => {
   try {
