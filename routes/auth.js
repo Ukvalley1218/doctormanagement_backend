@@ -15,7 +15,7 @@ const router = express.Router();
 router.post("/login", async (req, res) => {
   try {
     const { email } = req.body;
-
+    console.log(email);
     if (!email) return res.status(400).json({ msg: "Email is required" });
 
     let user = await User.findOne({ email });
