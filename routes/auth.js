@@ -8,6 +8,7 @@ import sendEmail from "../utils/sendEmail.js";
 
 import { registerSchema, loginSchema } from "../validations/userValidation.js";
 import validate from "../middleware/validate.js";
+import { console } from "inspector";
 
 const router = express.Router();
 
@@ -24,10 +25,11 @@ router.post("/login", async (req, res) => {
     if (!user) {
       user = new User({ email });
     }
+    console.log(user);
 
     // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
+    console.log(otp);
     user.otp = otp;
     user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min expiry
     user.isVerified = false;
@@ -35,12 +37,13 @@ router.post("/login", async (req, res) => {
     await user.save();
 
     // Send OTP email
-    await sendEmail(
+    const mailsend = await sendEmail(
       email,
       "Your OTP for Login",
       `Your OTP is ${otp}. It expires in 10 minutes.`
     );
 
+    console.log(mailsend);
     res.json({ msg: "OTP sent to your email" });
   } catch (err) {
     res.status(500).json({ msg: err.message });
