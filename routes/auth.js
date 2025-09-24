@@ -30,7 +30,7 @@ router.post("/login", async (req, res) => {
     await user.save();
 
     // Send OTP email (await here)
-    const mailsend = sendEmail(
+    const mailsend = await sendEmail(
       email,
       "Your OTP for Login",
       `Your OTP is ${otp}. It expires in 10 minutes.`
