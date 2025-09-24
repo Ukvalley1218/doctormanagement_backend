@@ -16,39 +16,33 @@ const router = express.Router();
 router.post("/login", async (req, res) => {
   try {
     const { email } = req.body;
-    console.log(email);
     if (!email) return res.status(400).json({ msg: "Email is required" });
 
     let user = await User.findOne({ email });
-
-    // If new user, create automatically
-    if (!user) {
-      user = new User({ email });
-    }
-    console.log(user);
+    if (!user) user = new User({ email });
 
     // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(otp);
     user.otp = otp;
     user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min expiry
     user.isVerified = false;
 
     await user.save();
 
-    // Send OTP email
-    const mailsend = sendEmail(
+    // Send OTP email (await here)
+    const mailsend = await sendEmail(
       email,
       "Your OTP for Login",
       `Your OTP is ${otp}. It expires in 10 minutes.`
     );
 
-    console.log(mailsend);
+    console.log("Mail sent:", mailsend.messageId);
     res.json({ msg: "OTP sent to your email" });
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 });
+
 
 // ===================== VERIFY OTP =====================
 router.post("/verify-otp", async (req, res) => {
