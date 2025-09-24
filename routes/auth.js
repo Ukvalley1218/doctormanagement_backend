@@ -21,24 +21,22 @@ router.post("/login", async (req, res) => {
     let user = await User.findOne({ email });
     if (!user) user = new User({ email });
 
-    // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.otp = otp;
-    user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min expiry
+    user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min
     user.isVerified = false;
-
     await user.save();
 
-    // Send OTP email (await here)
-    const mailsend = await sendEmail(
+    // Send OTP via Brevo
+    await sendEmail(
       email,
       "Your OTP for Login",
       `Your OTP is ${otp}. It expires in 10 minutes.`
     );
 
-    console.log("Mail sent:", mailsend.messageId);
     res.json({ msg: "OTP sent to your email" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: err.message });
   }
 });

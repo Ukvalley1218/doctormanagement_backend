@@ -6,27 +6,27 @@ dotenv.config();
 const sendEmail = async (to, subject, text) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.ZEPTO_HOST, // smtp.zeptomail.com
-      port: process.env.ZEPTO_PORT, // 465 or 587
-      secure: process.env.ZEPTO_PORT == 465, // true for 465 (SSL), false for 587 (TLS)
+      host: process.env.BREVO_HOST,
+      port: process.env.BREVO_PORT,
+      secure: process.env.BREVO_PORT == 465, // SSL if 465
       auth: {
-        user: process.env.ZEPTO_USER, // ZeptoMail SMTP username
-        pass: process.env.ZEPTO_PASS, // ZeptoMail SMTP password
+        user: process.env.BREVO_USER,
+        pass: process.env.BREVO_PASS,
       },
     });
 
     const info = await transporter.sendMail({
-      from: `"Your App Name" <${process.env.ZEPTO_USER}>`, // must be verified domain
+      from: `"Your App Name" <${process.env.BREVO_USER}>`,
       to,
       subject,
       text,
     });
 
-    console.log("📨 Email sent via ZeptoMail successfully!");
+    console.log("📨 Email sent via Brevo:", info.messageId);
     return info;
-  } catch (error) {
-    console.error("❌ Failed to send email via ZeptoMail", error);
-    throw error;
+  } catch (err) {
+    console.error("❌ Failed to send email via Brevo", err);
+    throw err;
   }
 };
 
