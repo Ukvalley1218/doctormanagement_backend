@@ -13,7 +13,7 @@ const sendEmail = async (to, subject, text) => {
     });
 
     const info = await transporter.sendMail({
-      from: "Your App Name" <${process.env.EMAIL_USER}>,
+      from: `"Your App Name" <saish.ukvalley01@gmail.com>`,
       to,
       subject,
       text,
