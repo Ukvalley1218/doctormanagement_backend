@@ -1,4 +1,3 @@
-// sendEmail.js
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
@@ -6,27 +5,27 @@ dotenv.config();
 const sendEmail = async (to, subject, text) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.BREVO_HOST,
-      port: process.env.BREVO_PORT,
-      secure: false,
+      service: "gmail",
       auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASS,
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
       },
     });
 
     const info = await transporter.sendMail({
-      from: `"Your App Name" <tejaskhairnar.ukvalley@gmail.com>`,
+      from: "Your App Name" <${process.env.GMAIL_USER}>,
       to,
       subject,
       text,
+      // Optional: HTML version
+      // html: <h3>${subject}</h3><p>${text}</p>
     });
 
-    console.log("📨 Email sent via Brevo:", info.messageId);
+    console.log("📨 Email sent:", info.messageId);
     return info;
-  } catch (err) {
-    console.error("❌ Failed to send email via Brevo", err);
-    throw err;
+  } catch (error) {
+    console.error("❌ Failed to send email:", error);
+    throw error;
   }
 };
 
