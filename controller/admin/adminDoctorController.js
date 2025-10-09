@@ -21,31 +21,98 @@ export const createDoctor = async (req, res) => {
 //   }
 // };
 
+// export const getDoctors = async (req, res) => {
+//   try {
+//     const { page = 1, limit = 10 } = req.query;
+
+//     const skip = (Number(page) - 1) * Number(limit);
+
+//     const [doctors, total] = await Promise.all([
+//       Doctor.find()
+//         // .populate("userId", "name email role")
+//         .skip(skip)
+//         .limit(Number(limit)),
+//       Doctor.countDocuments()
+//     ]);
+
+//     res.json({
+//       page: Number(page),
+//       limit: Number(limit),
+//       totalItems: total,
+//       totalPages: Math.ceil(total / limit),
+//       items: doctors,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
+
 export const getDoctors = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { search = "", page = 1, limit = 10 } = req.query;
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const [doctors, total] = await Promise.all([
-      Doctor.find()
-        // .populate("userId", "name email role")
+    // 🔹 Build search query
+    let query = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { specialty: { $regex: search, $options: "i" } },
+        { location: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // 🔹 Fetch paginated results
+    const [doctors, totalFiltered] = await Promise.all([
+      Doctor.find(query)
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limit)),
-      Doctor.countDocuments()
+      Doctor.countDocuments(query),
     ]);
 
+    // 🔹 Summary stats (global — not affected by search)
+    const [totalDoctors, activeDoctors, specialities, avgRatingData] = await Promise.all([
+      Doctor.countDocuments(),
+      Doctor.countDocuments({ status: "Active" }),
+      (await Doctor.distinct("specialty")).length,
+      Doctor.aggregate([
+        {
+          $group: {
+            _id: null,
+            avgRating: { $avg: "$rating" },
+          },
+        },
+      ]),
+    ]);
+
+    const avgRating =
+      avgRatingData.length > 0 && avgRatingData[0].avgRating
+        ? Number(avgRatingData[0].avgRating.toFixed(2))
+        : 0;
+
+    // 🔹 Response
     res.json({
+      summary: {
+        totalDoctors,
+        activeDoctors,
+        specialities,
+        avgRating,
+      },
+      filteredCount: totalFiltered,
       page: Number(page),
       limit: Number(limit),
-      totalItems: total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(totalFiltered / limit),
       items: doctors,
     });
   } catch (err) {
+    console.error("❌ getDoctors Error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 
 // @desc Get single doctor by ID

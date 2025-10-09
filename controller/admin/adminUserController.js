@@ -26,23 +26,80 @@ export const createUser = async (req,res)=>{
   }
 }
 
+// export const getAllUsers = async (req, res) => {
+
+//   try {
+//     const { page = 1, limit = 10 } = req.query;
+
+//     const skip = (Number(page) - 1) * Number(limit);
+
+//     const [users, total] = await Promise.all([
+//       User.find().select("-otp -otpExpiry").skip(skip).limit(Number(limit)),
+//       User.countDocuments()
+//     ]);
+
+//     res.json({
+//       page: Number(page),
+//       limit: Number(limit),
+//       totalItems: total,
+//       totalPages: Math.ceil(total / limit),
+//       items: users,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
+
+
 export const getAllUsers = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, search = "" } = req.query;
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const [users, total] = await Promise.all([
-      User.find().select("-otp -otpExpiry").skip(skip).limit(Number(limit)),
-      User.countDocuments()
-    ]);
+    // 🔍 Build search filter
+    const searchFilter = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+            { phone: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    // ✅ Get paginated users + counts in parallel
+    const [users, totalUsers, verifiedUsers, unverifiedUsers, newSignups] =
+      await Promise.all([
+        User.find(searchFilter)
+          .select("-otp -otpExpiry")
+          .skip(skip)
+          .limit(Number(limit))
+          .sort({ createdAt: -1 }),
+
+        User.countDocuments(searchFilter),
+        User.countDocuments({ ...searchFilter, isVerified: true }),
+        User.countDocuments({ ...searchFilter, isVerified: false }),
+
+        // 👇 Users created within the last 30 days
+        User.countDocuments({
+          ...searchFilter,
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        }),
+      ]);
 
     res.json({
       page: Number(page),
       limit: Number(limit),
-      totalItems: total,
-      totalPages: Math.ceil(total / limit),
+      totalItems: totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
       items: users,
+      stats: {
+        totalUsers,
+        activeUsers: verifiedUsers,
+        inactiveUsers: unverifiedUsers,
+        newSignupsLast30Days: newSignups,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
