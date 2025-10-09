@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, htmlContent) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -12,15 +12,12 @@ const sendEmail = async (to, subject, text) => {
       },
     });
 
-    const info = await transporter.sendMail({
+   const info = await transporter.sendMail({
       from: '"Healcure" <no-reply@healcure.ca>',
       to,
       subject,
-      html,
-      // Optional: HTML version
-      // html: <h3>${subject}</h3><p>${text}</p>
+      html: htmlContent, // ✅ explicitly HTML content
     });
-
     console.log("📨 Email sent:", info.messageId);
     return info;
   } catch (error) {
