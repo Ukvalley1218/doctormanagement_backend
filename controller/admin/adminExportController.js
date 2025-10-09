@@ -52,7 +52,7 @@ export const exportProducts = async (req, res) => {
 export const exportOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-    //   .populate("userId", "email name")
+      .populate("userId", "email name")
       .populate("items.productId", "name category")
       .select("-__v");
 
