@@ -48,6 +48,8 @@ const allowedOrigins = [
   "https://admindoctor.valleyhoster.com",
   "https://admin.healcure.ca",
   "https://healcure.ca",
+  "https://www.admin.healcure.ca",
+  "https://www.healcure.ca",
 ];
 
 app.use(
