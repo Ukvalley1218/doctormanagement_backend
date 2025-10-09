@@ -16,7 +16,7 @@ const sendEmail = async (to, subject, text) => {
       from: '"Healcure" <no-reply@healcure.ca>',
       to,
       subject,
-      text,
+      html,
       // Optional: HTML version
       // html: <h3>${subject}</h3><p>${text}</p>
     });
