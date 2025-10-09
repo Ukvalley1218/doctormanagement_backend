@@ -365,7 +365,7 @@ export const generateInvoice = async (req, res) => {
       .fontSize(10)
       .text(`Product Value: $${order.productValue}`, 380, summaryTop + 20)
       .text(`Delivery Charges: $${order.deliverfee}`, 380, summaryTop + 40)
-      .text(`Discount: -$${order.discountAmount || 0}`, 380, summaryTop + 60);
+      .text(`Discount: -$${Number(order.discountAmount || 0).toFixed(2)}`, 380, summaryTop + 60);
 
     // Line separator
     doc.moveTo(40, 90).lineTo(550, 90).stroke();
