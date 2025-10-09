@@ -33,6 +33,7 @@ export const getAllOrders = async (req, res) => {
       Order.find(query)
         .populate("userId", "name email")
         .populate("items.productId", "name category brand")
+        .sort({ createdAt: -1 }) // ✅ sort recent first
         .skip(skip)
         .limit(Number(limit)),
       Order.countDocuments(query),
