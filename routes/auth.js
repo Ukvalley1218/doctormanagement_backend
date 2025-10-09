@@ -28,11 +28,37 @@ router.post("/login", async (req, res) => {
     await user.save();
 
     // Send OTP via Brevo
-    await sendEmail(
-      email,
-      "Your OTP for Login",
-      `Your OTP is ${otp}. It expires in 10 minutes.`
-    );
+   await sendEmail(
+  email,
+  "Your Healcure Login OTP",
+  `
+  <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f9fafb; text-align: center; padding: 20px;">
+      <img src="https://healcure.ca/assets/logo-Bwud1c4U.png" alt="Healcure" style="width: 120px; margin-bottom: 10px;" />
+      <h2 style="color: #333;">Login Verification</h2>
+    </div>
+
+    <div style="padding: 20px; color: #333;">
+      <p>Dear User,</p>
+      <p>Thank you for choosing <strong>Healcure</strong>. Please use the following One-Time Password (OTP) to complete your login:</p>
+      
+      <div style="text-align: center; margin: 25px 0;">
+        <span style="font-size: 24px; letter-spacing: 4px; font-weight: bold; color: #1E88E5;">${otp}</span>
+      </div>
+      
+      <p>This OTP is valid for <strong>10 minutes</strong>. Please do not share it with anyone.</p>
+      <p>If you didn’t request this, please ignore this email or contact our support team immediately.</p>
+      
+      <p style="margin-top: 30px;">Best regards,<br /><strong>The Healcure Team</strong></p>
+    </div>
+
+    <div style="background-color: #f1f1f1; text-align: center; padding: 10px; font-size: 12px; color: #666;">
+      <p>© ${new Date().getFullYear()} Healcure. All rights reserved.</p>
+    </div>
+  </div>
+  `
+);
+
 
     res.json({ msg: "OTP sent to your email" });
   } catch (err) {
