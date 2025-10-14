@@ -8,7 +8,11 @@ export const createPromoCode = async (req, res) => {
     if (!code || !discountPercentage || !expiryDate || !usageLimit) {
       return res.status(400).json({ message: "Invalid data" });
     }
-    if(code) return res.status(400).json({ message: "Promo code already exists" });
+
+    const code_exist = await Promocode.findOne({ code: code.toUpperCase() });
+
+    if(code_exist) return res.status(400).json({ message: "Promo code already exists" });
+
     const promo = new Promocode({
       code,
       discountPercentage,
