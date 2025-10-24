@@ -6,7 +6,6 @@ const doctorSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      // required: true,
     },
     doctorId: { type: String, unique: true }, // Custom Sequential ID
     name: { type: String },
@@ -19,14 +18,36 @@ const doctorSchema = new mongoose.Schema(
     number: { type: Number },
     calendlyUrl: { type: String },
     email: { type: String },
-    // in models/Doctor.js (add field)
     imagePublicId: { type: String },
+
+    // 🩺 New Fields for Doctor Info Section
+    about: {
+      type: String,
+      trim: true,
+      default:
+        "This doctor is highly experienced and offers exceptional patient care in their field of expertise.",
+    },
+    services: {
+      type: [String],
+      default: [],
+    },
+    experience: {
+      type: String,
+      trim: true,
+    },
+    qualifications: {
+      type: String,
+      trim: true,
+    },
+
     // Product Status
     status: {
       type: String,
       enum: ["Active", "Inactive"],
       default: "Active",
     },
+
+    // ⭐ Reviews
     reviews: [
       {
         userId: {
@@ -34,7 +55,7 @@ const doctorSchema = new mongoose.Schema(
           ref: "User",
           required: true,
         },
-        name: { type: String }, // ✅ store user name
+        name: { type: String },
         rating: {
           type: Number,
           required: true,
@@ -45,10 +66,11 @@ const doctorSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
-        createdAt: { type: Date, default: Date.now }, // ✅ add timestamp
+        createdAt: { type: Date, default: Date.now },
       },
-      { timestamps: true },
     ],
+
+    // 🕓 Appointment Slots
     availableSlots: [
       {
         date: { type: Date, required: true },
@@ -70,4 +92,6 @@ doctorSchema.pre("save", async function (next) {
   this.doctorId = await generateSequentialId("Doctor", "DR");
   next();
 });
+
 export default mongoose.model("Doctor", doctorSchema);
+
