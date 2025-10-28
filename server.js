@@ -16,6 +16,7 @@ import countRoute from "./routes/products/countRoute.js"
 import orderTrackingRoute from "./routes/products/orderTrackingRoutes.js"
 import uploadRoutes from "./routes/cloudinary/uploadRoutes.js"
 import searchRoutes from "./routes/searchRoutes.js";
+import formRoute from "./routes/form/formRoute.js"
 
 // admin routes imports
 import orderTrackingRoutes from "./routes/admin/orderTrackingRoutes.js"
@@ -81,6 +82,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/form",formRoute);
 
 app.use("/api",countRoute);
 app.use("/api/orders",orderTrackingRoute);
