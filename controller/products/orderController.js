@@ -365,38 +365,26 @@ export const generateInvoice = async (req, res) => {
     const summaryTop = y + 20;
     doc.fontSize(12).text("Summary", 380, summaryTop);
 
-    // doc
-    //   .fontSize(10)
-    //   .text(`Product Value: $${order.productValue}`, 380, summaryTop + 20)
-    //   .text(`Delivery Charges: $${order.deliverfee}`, 380, summaryTop + 40)
-    //   .text(`Discount: -$${Number(order.discountAmount || 0).toFixed(2)}`, 380, summaryTop + 60);
-
-    // // Line separator
-    // doc.moveTo(40, 90).lineTo(550, 90).stroke();
-    // doc
-    //   .fontSize(12)
-    //   .text(
-    //     `Grand Total: $${order.totalPrice.toFixed(2)}`,
-    //     380,
-    //     summaryTop + 80,
-    //     {
-    //       bold: true,
-    //     }
-    //   );
-
     doc
       .fontSize(10)
-      .text(`Product Value: $${order.productValue.toFixed(2)}`, 380, summaryTop + 20)
-      .text(`Delivery Charges: $${order.deliverfee.toFixed(2)}`, 380, summaryTop + 40)
-      .text(`Discount: -$${Number(order.discountAmount || 0).toFixed(2)}`, 380, summaryTop + 60)
-      .text(`${province} Tax (${taxRate}%): $${taxAmount.toFixed(2)}`, 380, summaryTop + 80)
-      .font("Helvetica-Bold")
+      .text(`Product Value: $${order.productValue}`, 380, summaryTop + 20)
+      .text(`Delivery Charges: $${order.deliverfee}`, 380, summaryTop + 40)
+      .text(`Discount: -$${Number(order.discountAmount || 0).toFixed(2)}`, 380, summaryTop + 60);
+
+    // Line separator
+    doc.moveTo(40, 90).lineTo(550, 90).stroke();
+    doc
+      .fontSize(12)
       .text(
         `Grand Total: $${order.totalPrice.toFixed(2)}`,
         380,
-        summaryTop + 100
-      )
-      .font("Helvetica");
+        summaryTop + 80,
+        {
+          bold: true,
+        }
+      );
+
+    
 
     // 🔹 Footer
     doc.moveDown(4);
