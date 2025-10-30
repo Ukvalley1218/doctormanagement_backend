@@ -15,6 +15,8 @@ export const placeOrder = async (req, res) => {
       deliverfee,
       productValue,
       discountAmount,
+      taxRate,
+      taxAmount
     } = req.body;
     if (!session_id) {
       return res.status(400).json({ message: "Session ID is required" });
@@ -52,6 +54,8 @@ export const placeOrder = async (req, res) => {
       deliverfee,
       productValue,
       discountAmount,
+      taxRate,
+      taxAmount,
       shippingDetails,
       paymentStatus: "successful",
       orderStatus: "Placed",
@@ -360,25 +364,24 @@ export const generateInvoice = async (req, res) => {
     // 🔹 Totals Section (right-aligned like Amazon)
     const summaryTop = y + 20;
     doc.fontSize(12).text("Summary", 380, summaryTop);
+    const province = order.shippingDetails?.state || "Ontario";
+    const taxRate = order.taxRate || 13; // fallback to Ontario
+    const taxAmount = order.taxAmount || ((order.productValue * taxRate) / 100);
 
     doc
       .fontSize(10)
-      .text(`Product Value: $${order.productValue}`, 380, summaryTop + 20)
-      .text(`Delivery Charges: $${order.deliverfee}`, 380, summaryTop + 40)
-      .text(`Discount: -$${Number(order.discountAmount || 0).toFixed(2)}`, 380, summaryTop + 60);
-
-    // Line separator
-    doc.moveTo(40, 90).lineTo(550, 90).stroke();
-    doc
-      .fontSize(12)
+      .text(`Product Value: $${order.productValue.toFixed(2)}`, 380, summaryTop + 20)
+      .text(`Delivery Charges: $${order.deliverfee.toFixed(2)}`, 380, summaryTop + 40)
+      .text(`Discount: -$${Number(order.discountAmount || 0).toFixed(2)}`, 380, summaryTop + 60)
+      .text(`${province} Tax (${taxRate}%): $${taxAmount.toFixed(2)}`, 380, summaryTop + 80)
+      .font("Helvetica-Bold")
       .text(
         `Grand Total: $${order.totalPrice.toFixed(2)}`,
         380,
-        summaryTop + 80,
-        {
-          bold: true,
-        }
-      );
+        summaryTop + 100
+      )
+      .font("Helvetica");
+    
 
     // 🔹 Footer
     doc.moveDown(4);

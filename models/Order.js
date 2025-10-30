@@ -75,6 +75,11 @@ const orderSchema = new mongoose.Schema(
     deliverfee: { type: Number, default: 0 },
     productValue: { type: Number },
     discountAmount: { type: Number },
+
+    // tax fileds
+    taxRate: { type: Number, default: 0 },  // e.g., 13 for Ontario
+taxAmount: { type: Number, default: 0 }, // calculated tax value
+    
     shippingDetails: {
       name: String,
       apartment: String,
