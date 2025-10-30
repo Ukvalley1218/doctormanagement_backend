@@ -3,8 +3,8 @@ import { setSetting ,getSetting,updateSetting} from "../../controller/setting/se
 
 const router = express.Router();
 
-router.post('/',setSetting);
 router.get('/',getSetting);
+router.post('/',setSetting);
 router.put("/", updateSetting);
 
 
