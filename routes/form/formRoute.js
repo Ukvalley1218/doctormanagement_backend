@@ -1,9 +1,12 @@
-import { getforms, submitform } from "../../controller/Form/formController.js";
+import { deleteForm, getformbyid, getforms, submitform } from "../../controller/Form/formController.js";
 import express from "express";
 
 const router = express.Router();
 
-router.post("/submit",submitform);
-router.get("/get",getforms)
+router.get("/",getforms)
+router.post("/",submitform);
+router.get('/:id',getformbyid);
+router.delete('/',deleteForm)
+
 
 export default router;
