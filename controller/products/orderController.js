@@ -16,7 +16,7 @@ export const placeOrder = async (req, res) => {
       productValue,
       discountAmount,
       taxRate,
-      taxamount
+      taxAmount
     } = req.body;
     if (!session_id) {
       return res.status(400).json({ message: "Session ID is required" });
@@ -55,7 +55,7 @@ export const placeOrder = async (req, res) => {
       productValue,
       discountAmount,
       taxRate,
-      taxamount,
+      taxAmount,
       shippingDetails,
       paymentStatus: "successful",
       orderStatus: "Placed",
