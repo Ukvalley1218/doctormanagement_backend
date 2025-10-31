@@ -51,7 +51,7 @@ export const deletePromoCode = async (req, res) => {
   }
 };
 
-// ✅ User: Apply promo code
+// ✅ Step 1 — Only validate, don't increment yet
 export const applyPromoCode = async (req, res) => {
   try {
     const { code } = req.body;
@@ -59,7 +59,6 @@ export const applyPromoCode = async (req, res) => {
     if (!code) return res.status(400).json({ message: "Promo code required" });
 
     const promo = await Promocode.findOne({ code: code.toUpperCase(), isActive: true });
-
     if (!promo) return res.status(404).json({ message: "Invalid promo code" });
 
     if (promo.expiryDate < new Date()) {
@@ -70,15 +69,19 @@ export const applyPromoCode = async (req, res) => {
       return res.status(400).json({ message: "Promo code usage limit reached" });
     }
 
-    // ✅ Send discount % to frontend
+    // ✅ No increment here!
     res.json({
-      message: "Promo code applied",
+      message: "Promo code valid",
       discountPercentage: promo.discountPercentage,
+      promoCode: promo.code,
+      remainingUses:
+        promo.usageLimit > 0 ? promo.usageLimit - promo.usedCount : "Unlimited",
     });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 // get promocode by id  
 export const getpromocodebyid = async (req,res)=>{

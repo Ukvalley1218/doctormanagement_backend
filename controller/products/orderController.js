@@ -2,6 +2,7 @@ import Order from "../../models/Order.js";
 import Product from "../../models/Product.js";
 import Cart from "../../models/Cart.js";
 import PDFDocument from "pdfkit";
+import Promocode from "../../models/Promocode.js";
 import fs from "fs";
 import path from "path";
 
@@ -16,30 +17,28 @@ export const placeOrder = async (req, res) => {
       productValue,
       discountAmount,
       taxRate,
-      taxAmount
+      taxAmount,
+      promoCode, // 👈 added
     } = req.body;
+
     if (!session_id) {
       return res.status(400).json({ message: "Session ID is required" });
     }
 
-    // Find cart by session_id
-    const cart = await Cart.findOne({ sessionId: session_id }).populate(
-      "items.productId"
-    );
+    // Find cart
+    const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // Check stock availability
+    // Check stock
     for (let item of cart.items) {
       if (item.quantity > item.productId.stock) {
-        return res
-          .status(400)
-          .json({ message: `${item.productId.name} is out of stock` });
+        return res.status(400).json({ message: `${item.productId.name} is out of stock` });
       }
     }
 
-    // Create order linked to logged-in user
+    // ✅ Create order
     const order = new Order({
       userId: req.user.id,
       items: cart.items.map((i) => ({
@@ -59,32 +58,44 @@ export const placeOrder = async (req, res) => {
       shippingDetails,
       paymentStatus: "successful",
       orderStatus: "Placed",
+      promoCode: promoCode ? promoCode.toUpperCase() : null, // 👈 save code if used
       trackingHistory: [
-        {
-          status: "Placed",
-          note: "Order created successfully",
-        },
+        { status: "Placed", note: "Order created successfully" },
       ],
     });
 
-    await order.save(); // ✅ will auto-generate orderId here
+    await order.save();
 
-    // Deduct stock
+    // ✅ Deduct stock
     for (let item of cart.items) {
       await Product.findByIdAndUpdate(item.productId._id, {
         $inc: { stock: -item.quantity },
       });
     }
 
+    // ✅ Handle promo code usage
+    if (promoCode) {
+      const promo = await Promocode.findOne({ code: promoCode.toUpperCase() });
+      if (promo) {
+        promo.usedCount += 1;
+
+        if (promo.usageLimit > 0 && promo.usedCount >= promo.usageLimit) {
+          promo.isActive = false;
+        }
+
+        await promo.save();
+      }
+    }
+
+    // ✅ Clear cart
     await Cart.findOneAndDelete({ sessionId: session_id });
 
-    return res
-      .status(201)
-      .json({ message: "Order placed successfully", order });
+    res.status(201).json({ message: "Order placed successfully", order });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 // Get my orders
 // export const getMyOrders = async (req, res) => {
