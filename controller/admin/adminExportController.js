@@ -31,9 +31,55 @@ export const exportUsers = async (req, res) => {
 // @desc Export Doctors
 export const exportDoctors = async (req, res) => {
   try {
-    const doctors = await Doctor.find().populate("userId", "email name").select("-__v");
-    exportToCSV(res, doctors, "doctors");
+    const doctors = await Doctor.find()
+      .populate("userId", "email name")
+      .select(
+        "doctorId name image specialty location rating bio consultationFee number calendlyUrl email about services experience qualifications status reviews createdAt updatedAt"
+      )
+      .lean();
+
+    if (!doctors.length) {
+      return res.status(404).json({ message: "No doctors found" });
+    }
+
+    // Format doctor data for CSV export
+    const formattedDoctors = doctors.map((d) => {
+      const totalReviews = d.reviews?.length || 0;
+      const avgRating =
+        totalReviews > 0
+          ? (
+              d.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+              totalReviews
+            ).toFixed(2)
+          : d.rating || 0;
+
+      return {
+        Doctor_ID: d.doctorId,
+        Name: d.name || d.userId?.name || "",
+        Email: d.email || d.userId?.email || "",
+        Specialty: d.specialty,
+        Location: d.location,
+        Rating: avgRating,
+        Total_Reviews: totalReviews,
+        Consultation_Fee: d.consultationFee || "",
+        Contact_Number: d.number || "",
+        Calendly_URL: d.calendlyUrl || "",
+        Bio: d.bio || "",
+        About: d.about || "",
+        Services: d.services?.join(", ") || "",
+        Experience: d.experience || "",
+        Qualifications: d.qualifications || "",
+        Status: d.status,
+        Image_URL: d.image || "",
+        Created_At: d.createdAt?.toISOString(),
+        Updated_At: d.updatedAt?.toISOString(),
+      };
+    });
+
+    // Export as CSV
+    exportToCSV(res, formattedDoctors, "doctors");
   } catch (err) {
+    console.error("Error exporting doctors:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
