@@ -23,7 +23,7 @@ export const exportUsers = async (req, res) => {
   try {
     const users = await User.find()
       .select(
-        "userCode name email userDiscount role isVerified phone gender dob address image avatarUrl createdAt updatedAt"
+        "userCode name email userDiscount role isVerified phone address image avatarUrl createdAt updatedAt"
       )
       .lean();
 
@@ -40,8 +40,7 @@ export const exportUsers = async (req, res) => {
       Verified: u.isVerified ? "Yes" : "No",
       Discount_Percentage: u.userDiscount || 0,
       Phone: u.phone || "",
-      Gender: u.gender || "",
-      DOB: u.dob ? new Date(u.dob).toISOString().split("T")[0] : "",
+     
       Apartment: u.address?.apartment || "",
       Landmark: u.address?.landmark || "",
       Street_Address: u.address?.address || "",
