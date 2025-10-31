@@ -101,7 +101,7 @@ export const updatePromoCode = async (req, res) => {
   try {
     const { id } = req.params;
     // Check if id exists and is valid
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    if (!id) {
       return res.status(400).json({ message: "Invalid promo code ID" });
     }
 
