@@ -41,13 +41,45 @@ export const exportDoctors = async (req, res) => {
 // @desc Export Products
 export const exportProducts = async (req, res) => {
   try {
-    const products = await Product.find().select("-__v");
-    exportToCSV(res, products, "products");
+    // Select only relevant fields
+    const products = await Product.find()
+      .select(
+        "productId name category brand actualPrice sellingPrice discountPrice stock description mainImage images countryOfOrigin status dosage sideeffects createdAt updatedAt"
+      )
+      .lean();
+
+    if (!products.length) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    // Map data for CSV (flatten nested arrays)
+    const formattedProducts = products.map((p) => ({
+      Product_ID: p.productId,
+      Name: p.name,
+      Category: p.category,
+      Brand: p.brand,
+      Actual_Price: p.actualPrice,
+      Selling_Price: p.sellingPrice,
+      Discount_Percentage: p.discountPrice,
+      Stock: p.stock,
+      Description: p.description,
+      Main_Image_URL: p.mainImage || "",
+      Gallery_Images: p.images?.join(", ") || "",
+      Country_Of_Origin: p.countryOfOrigin,
+      Status: p.status,
+      Dosage: p.dosage || "",
+      Side_Effects: p.sideeffects || "",
+      Created_At: p.createdAt?.toISOString(),
+      Updated_At: p.updatedAt?.toISOString(),
+    }));
+
+    // Export as CSV
+    exportToCSV(res, formattedProducts, "products");
   } catch (err) {
+    console.error("Error exporting products:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
 // @desc Export Orders
 export const exportOrders = async (req, res) => {
   try {
