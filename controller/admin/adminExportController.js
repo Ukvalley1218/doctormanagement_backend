@@ -21,9 +21,42 @@ const exportToCSV = (res, data, filename) => {
 // @desc Export Users
 export const exportUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-otp -otpExpiry -__v"); // exclude sensitive
-    exportToCSV(res, users, "users");
+    const users = await User.find()
+      .select(
+        "userCode name email userDiscount role isVerified phone gender dob address image avatarUrl createdAt updatedAt"
+      )
+      .lean();
+
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found" });
+    }
+
+    // Format users for CSV export
+    const formattedUsers = users.map((u) => ({
+      User_Code: u.userCode,
+      Name: u.name || "",
+      Email: u.email,
+      Role: u.role,
+      Verified: u.isVerified ? "Yes" : "No",
+      Discount_Percentage: u.userDiscount || 0,
+      Phone: u.phone || "",
+      Gender: u.gender || "",
+      DOB: u.dob ? new Date(u.dob).toISOString().split("T")[0] : "",
+      Apartment: u.address?.apartment || "",
+      Landmark: u.address?.landmark || "",
+      Street_Address: u.address?.address || "",
+      City: u.address?.city || "",
+      State: u.address?.state || "",
+      ZIP: u.address?.zip || "",
+      Profile_Image_URL: u.image || u.avatarUrl || "",
+      Created_At: u.createdAt?.toISOString(),
+      Updated_At: u.updatedAt?.toISOString(),
+    }));
+
+    // Export as CSV
+    exportToCSV(res, formattedUsers, "users");
   } catch (err) {
+    console.error("Error exporting users:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
