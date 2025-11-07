@@ -104,6 +104,7 @@ const productSchema = new mongoose.Schema(
 
     // new fields
     manufacture : {type:String,trim:true},
+    prescriptionRequired:{type:boolean,default:true},
     
   },
   { timestamps: true }
