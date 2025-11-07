@@ -103,11 +103,9 @@ const productSchema = new mongoose.Schema(
     imagesPublicIds: [{ type: String }],
 
     // new fields
-    manufacture : {type:String,trim:true},
-    prescriptionRequired: {
-  type: Boolean,
-  default: true
-}
+    manufacture: { type: String, trim: true },
+prescriptionRequired: { type: Boolean, default: true },
+expiry: { type: Date } // new field
     
   },
   { timestamps: true }
