@@ -18,6 +18,7 @@ const doctorSchema = new mongoose.Schema(
     number: { type: Number },
     calendlyUrl: { type: String },
     email: { type: String },
+    
     imagePublicId: { type: String },
 
     // 🩺 New Fields for Doctor Info Section
@@ -70,18 +71,10 @@ const doctorSchema = new mongoose.Schema(
       },
     ],
 
-    // 🕓 Appointment Slots
-    availableSlots: [
-      {
-        date: { type: Date, required: true },
-        time: { type: String, required: true },
-        status: {
-          type: String,
-          enum: ["available", "confirmed"],
-          default: "available",
-        },
-      },
-    ],
+    // new fileds
+    website: {type:String},
+    address: {type:String},
+    
   },
   { timestamps: true }
 );

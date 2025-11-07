@@ -101,6 +101,10 @@ const productSchema = new mongoose.Schema(
     // in models/Product.js (add fields next to images)
     mainImagePublicId: { type: String },
     imagesPublicIds: [{ type: String }],
+
+    // new fields
+    manufacture : {type:String,trim:true},
+    
   },
   { timestamps: true }
 );
