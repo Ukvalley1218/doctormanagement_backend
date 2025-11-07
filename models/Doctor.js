@@ -18,6 +18,8 @@ const doctorSchema = new mongoose.Schema(
     // new
     videoconsultation: { type: Number },
     followupvisit: { type: Number },
+    office: { type: String },
+    website: { type: String },
     number: { type: Number },
     calendlyUrl: { type: String },
     email: { type: String },
