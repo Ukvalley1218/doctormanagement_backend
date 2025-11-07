@@ -15,6 +15,9 @@ const doctorSchema = new mongoose.Schema(
     rating: { type: Number, default: 0 },
     bio: { type: String },
     consultationFee: { type: Number },
+    // new
+    videoconsultation: { type: Number },
+    followupvisit: { type: Number },
     number: { type: Number },
     calendlyUrl: { type: String },
     email: { type: String },
