@@ -5,7 +5,7 @@ import { createCheckoutSession } from '../../controller/products/orderController
 
 const router = express.Router();
 router.post('/create-order',auth,createOrderAndPayment);
-router.put("/create-checkout-session", auth,createCheckoutSession);
+router.post("/create-checkout-session", auth,createCheckoutSession);
 router.get("/session/:session_id",auth, getCheckoutSession);
 
 export default router;
