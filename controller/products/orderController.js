@@ -166,7 +166,9 @@ export const placeOrder = async (req, res) => {
       items: cart.items.map((i) => ({
         productId: i.productId._id,
         name: i.productId.name,
-        price: i.productId.actualPrice,
+        description: i.description,
+        image: i.image,
+        price: i.productId.sellingPrice,
         quantity: i.quantity,
       })),
       totalPrice,
