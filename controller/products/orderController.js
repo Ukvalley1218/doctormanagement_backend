@@ -9,9 +9,6 @@ import Setting from "../../models/Setting.js";
 import fs from "fs";
 import path from "path";
 
-
-
-
 // Place an order
 // export const placeOrder = async (req, res) => {
 //   try {
@@ -123,62 +120,65 @@ export const createPaymentIntent = async (req, res) => {
       paymentIntentId: paymentIntent.id,
     });
   } catch (err) {
-    res.status(500).json({ message: "Stripe payment error", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Stripe payment error", error: err.message });
   }
 };
 
-
-
 export const createCheckoutSession = async (req, res) => {
   try {
-    const { amount, orderData } = req.body; // amount in INR
+    const { amount, orderData } = req.body;
     const settings = await Setting.findOne();
 
     if (!settings) {
-      return res.status(500).json({ message: "Stripe settings not configured" });
+      return res
+        .status(500)
+        .json({ message: "Stripe settings not configured" });
     }
 
     const stripe = new Stripe(settings.stripekey);
 
-    // Prepare metadata to receive back after success
+    // Convert all metadata values to strings for Stripe
     const metadata = {
-      ...orderData,
+      shippingDetails: JSON.stringify(orderData.shippingDetails || {}),
+      items: JSON.stringify(orderData.items || []),
+      productValue: orderData.productValue?.toString() || "0",
+      discountAmount: orderData.discountAmount?.toString() || "0",
+      deliverfee: orderData.deliverfee?.toString() || "0",
+      taxRate: orderData.taxRate?.toString() || "0",
+      taxAmount: orderData.taxAmount?.toString() || "0",
       promoCode: orderData.promoCode || "",
+      totalPrice: orderData.totalPrice?.toString() || "0",
     };
 
-    // Create Stripe Checkout session
-    const FRONTEND_URL =
-  process.env.FRONTEND_URL || "http://localhost:5173"; // fallback for safety
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-const session = await stripe.checkout.sessions.create({
-  payment_method_types: ["card"],
-
-  line_items: [
-    {
-      price_data: {
-        currency: settings.stripecurrency || "inr",
-        product_data: { name: "Order Payment" },
-        unit_amount: Math.round(amount * 100),
-      },
-      quantity: 1,
-    },
-  ],
-
-  mode: "payment",
-
-  success_url: `${FRONTEND_URL}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
-  cancel_url: `${FRONTEND_URL}/checkout-cancel`,
-
-  metadata,
-});
-
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: settings.stripecurrency || "inr",
+            product_data: { name: "Order Payment" },
+            unit_amount: Math.round(amount * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${FRONTEND_URL}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${FRONTEND_URL}/checkout-cancel`,
+      metadata,
+    });
 
     res.json({ url: session.url });
   } catch (err) {
-    res.status(500).json({ message: "Stripe session error", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Stripe session error", error: err.message });
   }
 };
-
 
 export const placeOrder = async (req, res) => {
   try {
@@ -202,7 +202,9 @@ export const placeOrder = async (req, res) => {
       return res.status(400).json({ message: "Session ID is required" });
     }
 
-    const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
+    const cart = await Cart.findOne({ sessionId: session_id }).populate(
+      "items.productId"
+    );
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
@@ -210,7 +212,9 @@ export const placeOrder = async (req, res) => {
     // Stock check...
     for (let item of cart.items) {
       if (item.quantity > item.productId.stock) {
-        return res.status(400).json({ message: `${item.productId.name} is out of stock` });
+        return res
+          .status(400)
+          .json({ message: `${item.productId.name} is out of stock` });
       }
     }
 
@@ -238,8 +242,8 @@ export const placeOrder = async (req, res) => {
 
       // Stripe fields
       paymentMode,
-stripeSessionId,
-stripePaymentStatus,
+      stripeSessionId,
+      stripePaymentStatus,
       paymentDetails: paymentDetails || null,
 
       trackingHistory: [
@@ -250,7 +254,7 @@ stripePaymentStatus,
     await order.save();
 
     // deduct stock, promo update, clear cart...
-        // ✅ Deduct stock
+    // ✅ Deduct stock
     for (let item of cart.items) {
       await Product.findByIdAndUpdate(item.productId._id, {
         $inc: { stock: -item.quantity },
@@ -279,8 +283,6 @@ stripePaymentStatus,
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
-
 
 // Get my orders
 // export const getMyOrders = async (req, res) => {
@@ -562,14 +564,30 @@ export const generateInvoice = async (req, res) => {
     doc.fontSize(12).text("Summary", 380, summaryTop);
     const province = order.shippingDetails?.state || "Ontario";
     const taxRate = order.taxRate || 13; // fallback to Ontario
-    const taxAmount = order.taxAmount || ((order.productValue * taxRate) / 100);
+    const taxAmount = order.taxAmount || (order.productValue * taxRate) / 100;
 
     doc
       .fontSize(10)
-      .text(`Product Value: $${order.productValue.toFixed(2)}`, 380, summaryTop + 20)
-      .text(`Delivery Charges: $${order.deliverfee.toFixed(2)}`, 380, summaryTop + 40)
-      .text(`Discount: -$${Number(order.discountAmount || 0).toFixed(2)}`, 380, summaryTop + 60)
-      .text(`${province} Tax (${taxRate}%): $${taxAmount.toFixed(2)}`, 380, summaryTop + 80)
+      .text(
+        `Product Value: $${order.productValue.toFixed(2)}`,
+        380,
+        summaryTop + 20
+      )
+      .text(
+        `Delivery Charges: $${order.deliverfee.toFixed(2)}`,
+        380,
+        summaryTop + 40
+      )
+      .text(
+        `Discount: -$${Number(order.discountAmount || 0).toFixed(2)}`,
+        380,
+        summaryTop + 60
+      )
+      .text(
+        `${province} Tax (${taxRate}%): $${taxAmount.toFixed(2)}`,
+        380,
+        summaryTop + 80
+      )
       .font("Helvetica-Bold")
       .text(
         `Grand Total: $${order.totalPrice.toFixed(2)}`,
@@ -577,7 +595,6 @@ export const generateInvoice = async (req, res) => {
         summaryTop + 100
       )
       .font("Helvetica");
-    
 
     // 🔹 Footer
     doc.moveDown(4);
