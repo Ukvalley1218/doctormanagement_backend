@@ -95,6 +95,7 @@ taxAmount: { type: Number, default: 0 }, // calculated tax value
       enum: ["pending", "successful", "failed"],
       default: "pending",
     },
+    // paymentStatus: paymentMode === "ONLINE" ? "successful" : "pending",
     orderStatus: {
       type: String,
       enum: [

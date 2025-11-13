@@ -3,10 +3,129 @@ import Product from "../../models/Product.js";
 import Cart from "../../models/Cart.js";
 import PDFDocument from "pdfkit";
 import Promocode from "../../models/Promocode.js";
+import Setting from "../../models/Setting.js";
+import Stripe from "stripe";
 import fs from "fs";
 import path from "path";
 
+
+
+
 // Place an order
+// export const placeOrder = async (req, res) => {
+//   try {
+//     const {
+//       session_id,
+//       shippingDetails,
+//       totalPrice,
+//       deliverfee,
+//       productValue,
+//       discountAmount,
+//       taxRate,
+//       taxAmount,
+//       promoCode, // 👈 added
+//     } = req.body;
+
+//     if (!session_id) {
+//       return res.status(400).json({ message: "Session ID is required" });
+//     }
+
+//     // Find cart
+//     const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
+//     if (!cart || cart.items.length === 0) {
+//       return res.status(400).json({ message: "Cart is empty" });
+//     }
+
+//     // Check stock
+//     for (let item of cart.items) {
+//       if (item.quantity > item.productId.stock) {
+//         return res.status(400).json({ message: `${item.productId.name} is out of stock` });
+//       }
+//     }
+
+//     // ✅ Create order
+//     const order = new Order({
+//       userId: req.user.id,
+//       items: cart.items.map((i) => ({
+//         productId: i.productId._id,
+//         name: i.productId.name,
+//         description: i.description,
+//         image: i.image,
+//         price: i.productId.actualPrice,
+//         quantity: i.quantity,
+//       })),
+//       totalPrice,
+//       deliverfee,
+//       productValue,
+//       discountAmount,
+//       taxRate,
+//       taxAmount,
+//       shippingDetails,
+//       paymentStatus: "successful",
+//       orderStatus: "Placed",
+//       promoCode: promoCode ? promoCode.toUpperCase() : null, // 👈 save code if used
+//       trackingHistory: [
+//         { status: "Placed", note: "Order created successfully" },
+//       ],
+//     });
+
+//     await order.save();
+
+//     // ✅ Deduct stock
+//     for (let item of cart.items) {
+//       await Product.findByIdAndUpdate(item.productId._id, {
+//         $inc: { stock: -item.quantity },
+//       });
+//     }
+
+//     // ✅ Handle promo code usage
+//     if (promoCode) {
+//       const promo = await Promocode.findOne({ code: promoCode.toUpperCase() });
+//       if (promo) {
+//         promo.usedCount += 1;
+
+//         if (promo.usageLimit > 0 && promo.usedCount >= promo.usageLimit) {
+//           promo.isActive = false;
+//         }
+
+//         await promo.save();
+//       }
+//     }
+
+//     // ✅ Clear cart
+//     await Cart.findOneAndDelete({ sessionId: session_id });
+
+//     res.status(201).json({ message: "Order placed successfully", order });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
+
+// create payment intent
+export const createPaymentIntent = async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    if (!amount) return res.status(400).json({ message: "Amount required" });
+
+    // Fetch settings (stripe keys)
+    const setting = await Setting.findOne();
+    const stripe = new Stripe(setting.stripekey);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100),
+      currency: setting.stripecurrency || "usd",
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Stripe payment error", error: err.message });
+  }
+};
+
 export const placeOrder = async (req, res) => {
   try {
     const {
@@ -18,34 +137,35 @@ export const placeOrder = async (req, res) => {
       discountAmount,
       taxRate,
       taxAmount,
-      promoCode, // 👈 added
+      promoCode,
+      paymentMode, // COD or ONLINE
+      stripePaymentIntentId,
+      stripePaymentStatus,
+      paymentDetails,
     } = req.body;
 
     if (!session_id) {
       return res.status(400).json({ message: "Session ID is required" });
     }
 
-    // Find cart
     const cart = await Cart.findOne({ sessionId: session_id }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // Check stock
+    // Stock check...
     for (let item of cart.items) {
       if (item.quantity > item.productId.stock) {
         return res.status(400).json({ message: `${item.productId.name} is out of stock` });
       }
     }
 
-    // ✅ Create order
+    // ⬇️ INSERT PAYMENT TYPE & STRIPE INFO
     const order = new Order({
       userId: req.user.id,
       items: cart.items.map((i) => ({
         productId: i.productId._id,
         name: i.productId.name,
-        description: i.description,
-        image: i.image,
         price: i.productId.actualPrice,
         quantity: i.quantity,
       })),
@@ -56,9 +176,16 @@ export const placeOrder = async (req, res) => {
       taxRate,
       taxAmount,
       shippingDetails,
-      paymentStatus: "successful",
+      paymentStatus: paymentMode === "COD" ? "pending" : "successful",
       orderStatus: "Placed",
-      promoCode: promoCode ? promoCode.toUpperCase() : null, // 👈 save code if used
+      promoCode: promoCode ? promoCode.toUpperCase() : null,
+
+      // Stripe fields
+      paymentMode,
+      stripePaymentIntentId: stripePaymentIntentId || null,
+      stripePaymentStatus: stripePaymentStatus || null,
+      paymentDetails: paymentDetails || null,
+
       trackingHistory: [
         { status: "Placed", note: "Order created successfully" },
       ],
@@ -66,7 +193,8 @@ export const placeOrder = async (req, res) => {
 
     await order.save();
 
-    // ✅ Deduct stock
+    // deduct stock, promo update, clear cart...
+        // ✅ Deduct stock
     for (let item of cart.items) {
       await Product.findByIdAndUpdate(item.productId._id, {
         $inc: { stock: -item.quantity },
@@ -95,6 +223,7 @@ export const placeOrder = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 
 // Get my orders
