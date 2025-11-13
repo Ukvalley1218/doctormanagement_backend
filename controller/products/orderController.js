@@ -126,6 +126,56 @@ export const createPaymentIntent = async (req, res) => {
   }
 };
 
+import Stripe from "stripe";
+import Setting from "../models/Setting.js";
+
+export const createCheckoutSession = async (req, res) => {
+  try {
+    const { amount, orderData } = req.body; // amount in INR
+    const settings = await Setting.findOne();
+
+    if (!settings) {
+      return res.status(500).json({ message: "Stripe settings not configured" });
+    }
+
+    const stripe = new Stripe(settings.stripekey);
+
+    // Prepare metadata to receive back after success
+    const metadata = {
+      ...orderData,
+      promoCode: orderData.promoCode || "",
+    };
+
+    // Create Stripe Checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+
+      line_items: [
+        {
+          price_data: {
+            currency: settings.stripecurrency || "inr",
+            product_data: { name: "Order Payment" },
+            unit_amount: Math.round(amount * 100),
+          },
+          quantity: 1,
+        },
+      ],
+
+      mode: "payment",
+
+      success_url: `${process.env.FRONTEND_URL}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/checkout-cancel`,
+
+      metadata,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    res.status(500).json({ message: "Stripe session error", error: err.message });
+  }
+};
+
+
 export const placeOrder = async (req, res) => {
   try {
     const {
@@ -184,8 +234,8 @@ export const placeOrder = async (req, res) => {
 
       // Stripe fields
       paymentMode,
-      stripePaymentIntentId: stripePaymentIntentId || null,
-      stripePaymentStatus: stripePaymentStatus || null,
+stripeSessionId,
+stripePaymentStatus,
       paymentDetails: paymentDetails || null,
 
       trackingHistory: [
