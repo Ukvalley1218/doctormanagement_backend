@@ -6,6 +6,7 @@ import Setting from "../../models/Setting.js";
 
 
 
+
 // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2022-11-15" });
 
 // export const createOrderAndPayment = async (req, res) => {
@@ -256,6 +257,83 @@ export const stripeWebhookHandler = async (req, res) => {
   }
 };
 
+
+
+export const createCheckoutSession = async (req, res) => {
+  try {
+    const { amount, orderData } = req.body;
+
+    const settings = await Setting.findOne();
+    if (!settings) return res.status(500).json({ message: "Stripe settings not configured" });
+
+    const stripe = new Stripe(settings.stripekey);
+
+    const FRONTEND_URL =
+      process.env.FRONTEND_URL || "http://localhost:5173";
+
+    // Prepare metadata (Stripe only allows strings)
+    const metadata = {
+      promoCode: orderData.promoCode || "",
+      productValue: String(orderData.productValue || 0),
+      discountAmount: String(orderData.discountAmount || 0),
+      taxAmount: String(orderData.taxAmount || 0),
+      deliverfee: String(orderData.deliverfee || 0),
+      totalPrice: String(orderData.totalPrice || 0),
+
+      // Must convert objects/arrays to strings
+      shippingDetails: JSON.stringify(orderData.shippingDetails || {}),
+      items: JSON.stringify(orderData.items || []),
+    };
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+
+      line_items: [
+        {
+          price_data: {
+            currency: settings.stripecurrency || "inr",
+            product_data: {
+              name: "Healcure Order Payment",
+            },
+            unit_amount: Math.round(amount * 100),
+          },
+          quantity: 1,
+        },
+      ],
+
+      success_url: `${FRONTEND_URL}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${FRONTEND_URL}/checkout-cancel`,
+
+      metadata,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    res.status(500).json({
+      message: "Stripe session error",
+      error: err.message,
+    });
+  }
+};
+
+export const getCheckoutSession = async (req, res) => {
+  try {
+    const { session_id } = req.params;
+
+    const settings = await Setting.findOne();
+    const stripe = new Stripe(settings.stripekey);
+
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+
+    res.json(session);
+  } catch (err) {
+    res.status(500).json({
+      message: "Stripe session fetch error",
+      error: err.message,
+    });
+  }
+};
 
 
 
