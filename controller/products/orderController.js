@@ -147,27 +147,31 @@ export const createCheckoutSession = async (req, res) => {
     };
 
     // Create Stripe Checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+    const FRONTEND_URL =
+  process.env.FRONTEND_URL || "http://localhost:5173"; // fallback for safety
 
-      line_items: [
-        {
-          price_data: {
-            currency: settings.stripecurrency || "inr",
-            product_data: { name: "Order Payment" },
-            unit_amount: Math.round(amount * 100),
-          },
-          quantity: 1,
-        },
-      ],
+const session = await stripe.checkout.sessions.create({
+  payment_method_types: ["card"],
 
-      mode: "payment",
+  line_items: [
+    {
+      price_data: {
+        currency: settings.stripecurrency || "inr",
+        product_data: { name: "Order Payment" },
+        unit_amount: Math.round(amount * 100),
+      },
+      quantity: 1,
+    },
+  ],
 
-      success_url: `${process.env.FRONTEND_URL}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/checkout-cancel`,
+  mode: "payment",
 
-      metadata,
-    });
+  success_url: `${FRONTEND_URL}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `${FRONTEND_URL}/checkout-cancel`,
+
+  metadata,
+});
+
 
     res.json({ url: session.url });
   } catch (err) {
