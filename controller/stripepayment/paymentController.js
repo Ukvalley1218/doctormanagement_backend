@@ -282,21 +282,29 @@ export const createCheckoutSession = async (req, res) => {
     const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
 
     // Ensure orderData exists to avoid undefined errors
-    const od = orderData || {};
+    // Ensure orderData exists
+const od = orderData || {};
 
-    // 🔐 Convert everything to plain strings (Stripe requires string metadata)
-    const metadata = {
-      promoCode: String(od.promoCode || ""),
-      productValue: String(od.productValue ?? 0),
-      discountAmount: String(od.discountAmount ?? 0),
-      taxAmount: String(od.taxAmount ?? 0),
-      deliverfee: String(od.deliverfee ?? 0),
-      totalPrice: String(od.totalPrice ?? 0),
+// 🔥 Fix weird hash-format inputs (Stripe error source)
+const safeItems = Array.isArray(od.items)
+  ? od.items
+  : Object.values(od.items || {});
 
-      // stringify arrays/objects
-      items: JSON.stringify(od.items || []),
-      shippingDetails: JSON.stringify(od.shippingDetails || {}),
-    };
+// Metadata
+const metadata = {
+  promoCode: String(od.promoCode || ""),
+  productValue: String(od.productValue ?? 0),
+  discountAmount: String(od.discountAmount ?? 0),
+  taxAmount: String(od.taxAmount ?? 0),
+  deliverfee: String(od.deliverfee ?? 0),
+  totalPrice: String(od.totalPrice ?? 0),
+
+  // 🔥 now always a clean JSON array
+  items: JSON.stringify(safeItems),
+
+  shippingDetails: JSON.stringify(od.shippingDetails || {}),
+};
+
 
     console.log("METADATA SENT TO STRIPE = ", metadata);
 
