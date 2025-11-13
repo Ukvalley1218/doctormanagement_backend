@@ -284,6 +284,8 @@ export const createCheckoutSession = async (req, res) => {
       shippingDetails: JSON.stringify(orderData.shippingDetails || {}),
       items: JSON.stringify(orderData.items || []),
     };
+    console.log("METADATA SENT TO STRIPE = ", metadata);
+
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
