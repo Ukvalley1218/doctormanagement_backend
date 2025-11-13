@@ -261,63 +261,75 @@ export const stripeWebhookHandler = async (req, res) => {
 
 export const createCheckoutSession = async (req, res) => {
   try {
+    console.log("CREATE CHECKOUT SESSION REQ BODY:", JSON.stringify(req.body).slice(0, 2000));
     const { amount, orderData } = req.body;
 
+    if (typeof amount === "undefined" || amount === null) {
+      return res.status(400).json({ message: "Amount is required" });
+    }
+
     const settings = await Setting.findOne();
-    if (!settings) return res.status(500).json({ message: "Stripe settings not configured" });
+    if (!settings) {
+      return res.status(500).json({ message: "Stripe settings not configured" });
+    }
+
+    // sanitize currency (strip stray quotes if any)
+    let currency = (settings.stripecurrency || "inr").toString().trim();
+    currency = currency.replace(/^"+|"+$/g, "").toLowerCase();
 
     const stripe = new Stripe(settings.stripekey);
 
-    const FRONTEND_URL =
-      process.env.FRONTEND_URL || "http://localhost:5173";
+    const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
 
-    // Prepare metadata (Stripe only allows strings)
+    // Ensure orderData exists to avoid undefined errors
+    const od = orderData || {};
+
+    // 🔐 Convert everything to plain strings (Stripe requires string metadata)
     const metadata = {
-      promoCode: orderData.promoCode || "",
-      productValue: String(orderData.productValue || 0),
-      discountAmount: String(orderData.discountAmount || 0),
-      taxAmount: String(orderData.taxAmount || 0),
-      deliverfee: String(orderData.deliverfee || 0),
-      totalPrice: String(orderData.totalPrice || 0),
+      promoCode: String(od.promoCode || ""),
+      productValue: String(od.productValue ?? 0),
+      discountAmount: String(od.discountAmount ?? 0),
+      taxAmount: String(od.taxAmount ?? 0),
+      deliverfee: String(od.deliverfee ?? 0),
+      totalPrice: String(od.totalPrice ?? 0),
 
-      // Must convert objects/arrays to strings
-      shippingDetails: JSON.stringify(orderData.shippingDetails || {}),
-      items: JSON.stringify(orderData.items || []),
+      // stringify arrays/objects
+      items: JSON.stringify(od.items || []),
+      shippingDetails: JSON.stringify(od.shippingDetails || {}),
     };
-    console.log("METADATA SENT TO STRIPE = ", metadata);
 
+    console.log("METADATA SENT TO STRIPE = ", metadata);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
-
       line_items: [
         {
           price_data: {
-            currency: settings.stripecurrency || "inr",
+            currency,
             product_data: {
               name: "Healcure Order Payment",
             },
-            unit_amount: Math.round(amount * 100),
+            unit_amount: Math.round(Number(amount) * 100),
           },
           quantity: 1,
         },
       ],
-
       success_url: `${FRONTEND_URL}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${FRONTEND_URL}/checkout-cancel`,
-
       metadata,
     });
 
-    res.json({ url: session.url });
+    return res.json({ url: session.url });
   } catch (err) {
-    res.status(500).json({
+    console.error("createCheckoutSession error:", err && err.stack ? err.stack : err);
+    return res.status(500).json({
       message: "Stripe session error",
-      error: err.message,
+      error: err && err.message ? err.message : String(err),
     });
   }
 };
+
 
 export const getCheckoutSession = async (req, res) => {
   try {
