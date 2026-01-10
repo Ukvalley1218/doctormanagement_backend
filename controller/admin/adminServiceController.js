@@ -60,7 +60,6 @@ export const getAllServices = async (req, res) => {
         .limit(limit),
 
       Service.countDocuments(),
-
       Service.countDocuments({ isActive: true }),
       Service.countDocuments({ isActive: false }),
     ]);
@@ -69,10 +68,11 @@ export const getAllServices = async (req, res) => {
       success: true,
       data: services,
       pagination: {
-        total,
+        total,                       // all services
         page,
         limit,
         totalPages: Math.ceil(total / limit),
+        totalItems: services.length,   // 🔥 items in this page
       },
       stats: {
         total,
@@ -87,6 +87,7 @@ export const getAllServices = async (req, res) => {
     });
   }
 };
+
 
 
 

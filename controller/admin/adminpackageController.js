@@ -182,7 +182,6 @@ export const getAllPackages = async (req, res) => {
         .limit(limit),
 
       Package.countDocuments(),
-
       Package.countDocuments({ isActive: true }),
       Package.countDocuments({ isActive: false }),
     ]);
@@ -191,10 +190,11 @@ export const getAllPackages = async (req, res) => {
       success: true,
       data: packages,
       pagination: {
-        total,
+        total,                         // total packages in DB
         page,
         limit,
         totalPages: Math.ceil(total / limit),
+        totalItems: packages.length, // 🔥 packages returned in this page
       },
       stats: {
         total,
@@ -210,7 +210,6 @@ export const getAllPackages = async (req, res) => {
     });
   }
 };
-
 
 /**
  * GET PACKAGE BY ID
