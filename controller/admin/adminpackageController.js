@@ -170,7 +170,7 @@ export const togglePackageStatus = async (req, res) => {
  */
 export const getAllPackages = async (req, res) => {
   try {
-    const packages = await Package.find().sort({ createdAt: -1 });
+    const packages = await Package.find().populate("services.service").sort({ createdAt: -1 });
 
     res.json({
       success: true,
