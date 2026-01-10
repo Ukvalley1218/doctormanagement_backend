@@ -78,7 +78,7 @@ export const getPackageById = async (req, res) => {
     if (!packages) {
       return res.status(404).json({
         success: false,
-        message: "Service not found",
+        message: "Package not found",
       });
     }
 
