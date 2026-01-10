@@ -3,7 +3,7 @@ import { createPackage,updatePackage,deletePackage,togglePackageStatus } from ".
 import { protectAdmin } from "../../middleware/adminauthMiddleware.js";
 
 const router = Router();
-
+router.get("/",protectAdmin)
 router.post("/",protectAdmin,createPackage);
 router.put("/:id",protectAdmin,updatePackage);
 router.delete("/:id",protectAdmin,deletePackage);

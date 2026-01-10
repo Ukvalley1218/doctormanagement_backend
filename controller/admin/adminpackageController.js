@@ -53,3 +53,43 @@ export const togglePackageStatus = async (req, res) => {
   await pack.save();
   res.json({ success: true, data: pack });
 };
+
+export const getAllPackages = async (req, res) => {
+  try {
+    const packages = await Package.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: packages,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+
+export const getPackageById = async (req, res) => {
+  try {
+    const packages = await Package.findById(req.params.id);
+
+    if (!packages) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: packages,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
