@@ -73,7 +73,7 @@ export const getAllPackages = async (req, res) => {
 
 export const getPackageById = async (req, res) => {
   try {
-    const packages = await Package.findById(req.params.id);
+    const packages = await Package.findById(req.params.id).populate("services.service");;
 
     if (!packages) {
       return res.status(404).json({
