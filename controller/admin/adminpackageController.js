@@ -170,11 +170,37 @@ export const togglePackageStatus = async (req, res) => {
  */
 export const getAllPackages = async (req, res) => {
   try {
-    const packages = await Package.find().populate("services.service").sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [packages, total, activeCount, inactiveCount] = await Promise.all([
+      Package.find()
+        .populate("services.service")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+
+      Package.countDocuments(),
+
+      Package.countDocuments({ isActive: true }),
+      Package.countDocuments({ isActive: false }),
+    ]);
 
     res.json({
       success: true,
       data: packages,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+      stats: {
+        total,
+        active: activeCount,
+        inactive: inactiveCount,
+      },
     });
   } catch (error) {
     console.error("Get Packages Error:", error);
@@ -184,6 +210,7 @@ export const getAllPackages = async (req, res) => {
     });
   }
 };
+
 
 /**
  * GET PACKAGE BY ID
