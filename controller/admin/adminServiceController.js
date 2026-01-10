@@ -1,6 +1,6 @@
+
 import Service from "../../models/Service.js";
 import slugify from "slugify";
-
 
 export const createService = async (req, res) => {
   try {
@@ -47,10 +47,42 @@ export const toggleServiceStatus = async (req, res) => {
   res.json({ success: true, data: service });
 };
 
-export const getAllServices = async (req,res)=>{
-    const services = await Service.find().sort({ createdAt :-1});
-    if(!services || services.length===0){
-        return  res.status(404).json({message:"No services found"});
+export const getAllServices = async (req, res) => {
+  try {
+    const services = await Service.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: services,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+
+export const getServiceById = async (req, res) => {
+  try {
+    const service = await Service.findById(req.params.id);
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
     }
-    res.status(200).json({success:true,data:services});
-}
+
+    res.status(200).json({
+      success: true,
+      data: service,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
