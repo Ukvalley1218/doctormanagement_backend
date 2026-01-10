@@ -24,7 +24,7 @@ router.put(
   uploadServiceImage
 );
 
-router.put("/packages/:id/image",adminOnly,upload.single("images"),uploadPackageImage)
+router.put("/packages/:id/image",adminOnly,upload.single("image"),uploadPackageImage)
 
 /** PRODUCT IMAGES (Admin only)
  * mainImage: single file field "mainImage"
