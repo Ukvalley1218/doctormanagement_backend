@@ -32,14 +32,31 @@ export const createPackage = async (req, res) => {
 };
 
 export const updatePackage = async (req, res) => {
-  const data = req.body;
-  if (data.name) data.slug = slugify(data.name, { lower: true });
+  try {
+    const data = req.body;
 
-  const pack = await Package.findByIdAndUpdate(req.params.id, data, {
-    new: true,
-  });
+    if (data.name) {
+      data.slug = slugify(data.name, { lower: true });
+    }
 
-  res.json({ success: true, data: pack });
+    // 🔥 Fix embedded services
+    if (data.services) {
+      data.services = data.services.map((id) => ({ service: id }));
+    }
+
+    const pack = await Package.findByIdAndUpdate(
+      req.params.id,
+      data,
+      { new: true }
+    );
+
+    res.json({ success: true, data: pack });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
 export const deletePackage = async (req, res) => {
