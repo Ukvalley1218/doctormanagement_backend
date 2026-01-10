@@ -17,6 +17,8 @@ import orderTrackingRoute from "./routes/products/orderTrackingRoutes.js"
 import uploadRoutes from "./routes/cloudinary/uploadRoutes.js"
 import searchRoutes from "./routes/searchRoutes.js";
 import formRoute from "./routes/form/formRoute.js"
+import serviceRoutes from "./routes/services-and-packages/serviceRoutes.js";
+import packageRoutes from "./routes/services-and-packages/packageRoutes.js";
 
 // admin routes imports
 import orderTrackingRoutes from "./routes/admin/orderTrackingRoutes.js"
@@ -28,6 +30,8 @@ import adminDoctorRoutes from "./routes/admin/adminDoctorRoutes.js"
 import adminOrderRoutes  from "./routes/admin/adminOrderRoutes.js"
 import adminAnalyticsRoutes from "./routes/admin/adminAnalyticsRoutes.js"
 import adminExportRoutes from "./routes/admin/adminExportRoutes.js"
+import adminserviceRoutes from "./routes/admin/adminServiceRoutes.js";
+import adminpackageRoutes from "./routes/admin/adminPackageRoutes.js";
 
 // promo code imports
 import promoCodeRoutes from "./routes/promocode/promoCodeRoutes.js"
@@ -83,6 +87,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/form",formRoute);
+app.use("/api/services",serviceRoutes);
+app.use("/api/packages",packageRoutes);
 
 app.use("/api",countRoute);
 app.use("/api/orders",orderTrackingRoute);
@@ -107,6 +113,8 @@ app.use("/api/admin/orders",adminOrderRoutes);
 app.use("/api/admin/analytics",adminAnalyticsRoutes);
 app.use("/api/admin/setting",settingroutes)
 app.use("/api/admin/exports",adminExportRoutes);
+app.use("/api/admin/services",adminserviceRoutes);
+app.use("/api/admin/packages",adminpackageRoutes);
 
 
 app.get("/", (req, res) => {

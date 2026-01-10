@@ -159,7 +159,7 @@ export const createCheckoutSession = async (req, res) => {
       line_items: [
         {
           price_data: {
-            currency: settings.stripecurrency || "inr",
+            currency: settings.stripecurrency || "usd",
             product_data: { name: "Order Payment" },
             unit_amount: Math.round(amount * 100),
           },

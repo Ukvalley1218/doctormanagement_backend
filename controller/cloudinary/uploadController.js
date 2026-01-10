@@ -1,6 +1,8 @@
 import User from "../../models/User.js";
 import Doctor from "../../models/Doctor.js";
 import Product from "../../models/Product.js";
+import Service from "../../models/Service.js";
+import Package from "../../models/Package.js";
 
 import { uploadBuffer,uploadMany,deleteByPublicId } from "../../services/cloudinaryService.js";
 
@@ -117,4 +119,46 @@ export const removeProductGalleryImages = async (req, res) => {
   } catch (e) {
     res.status(500).json({ message: "Delete failed", error: e.message });
   }
+};
+
+// upload service image
+export const uploadServiceImage = async (req, res) => {
+  const service = await Service.findById(req.params.id);
+  if (!service) return res.status(404).json({ message: "Service not found" });
+
+  if (service.image?.publicId) {
+    await deleteByPublicId(service.image.publicId);
+  }
+
+  const result = await uploadBuffer(req.file.buffer, "services");
+
+  service.image = {
+    url: result.secure_url,
+    publicId: result.public_id,
+  };
+
+  await service.save();
+
+  res.json({ success: true, data: service });
+};
+
+// upload package image
+export const uploadPackageImage = async (req, res) => {
+  const pack = await Package.findById(req.params.id);
+  if (!pack) return res.status(404).json({ message: "Package not found" });
+
+  if (pack.image?.publicId) {
+    await deleteByPublicId(pack.image.publicId);
+  }
+
+  const result = await uploadBuffer(req.file.buffer, "packages");
+
+  pack.image = {
+    url: result.secure_url,
+    publicId: result.public_id,
+  };
+
+  await pack.save();
+
+  res.json({ success: true, data: pack });
 };
