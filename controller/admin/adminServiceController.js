@@ -49,11 +49,36 @@ export const toggleServiceStatus = async (req, res) => {
 
 export const getAllServices = async (req, res) => {
   try {
-    const services = await Service.find().sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [services, total, activeCount, inactiveCount] = await Promise.all([
+      Service.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+
+      Service.countDocuments(),
+
+      Service.countDocuments({ isActive: true }),
+      Service.countDocuments({ isActive: false }),
+    ]);
 
     res.status(200).json({
       success: true,
       data: services,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+      stats: {
+        total,
+        active: activeCount,
+        inactive: inactiveCount,
+      },
     });
   } catch (err) {
     res.status(500).json({
@@ -62,6 +87,7 @@ export const getAllServices = async (req, res) => {
     });
   }
 };
+
 
 
 export const getServiceById = async (req, res) => {
