@@ -55,7 +55,9 @@ const allowedOrigins = [
   "https://healcure.ca",
   "https://www.admin.healcure.ca",
   "https://www.healcure.ca",
-  "https://healcure.valleyhoster.com"
+  "https://healcure.valleyhoster.com",
+  "http://localhost:5174",
+  "https://doctor-management-admin.vercel.app"
 ];
 
 app.use(
